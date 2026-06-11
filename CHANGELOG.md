@@ -16,3 +16,4 @@ breaking changes between any two versions - see upgrade notes per version.
 - `HopperServiceProvider` registering the publishable `config/hopper.php` stub (`queue_connection`, `default_chunk_size`, `audit.driver`, `tables` map) and loading the (empty) package migrations' directory.
 - Quality tooling: `phpstan.neon` (Larastan, level 10, analyses `src`) and `pint.json` (Laravel preset).
 - Pest test harness (Testbench `TestCase` with the provider registered, `tests/Pest.php`) and a smoke test asserting the provider boots, config merges, and the config file publishes.
+- GitHub Actions CI (`.github/workflows/ci.yml`) running Pint (`--test`), PHPStan, and Pest across a PHP × Laravel matrix.
