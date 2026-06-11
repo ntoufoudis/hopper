@@ -53,8 +53,8 @@ final class ImportRun extends Model
      */
     public function progress(): array
     {
-        $total = ($this->total ?? 0);
-        $processed = $this->processed;
+        $total = (int) ($this->total ?? 0);
+        $processed = (int) $this->processed;
 
         return [
             'processed' => $processed,

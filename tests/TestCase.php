@@ -20,4 +20,27 @@ abstract class TestCase extends Orchestra
             HopperServiceProvider::class,
         ];
     }
+
+    /**
+     * @param  Application  $app
+     */
+    protected function defineEnvironment($app): void
+    {
+        $app['config']->set('database.default', 'testing');
+        $app['config']->set('database.connections.testing', [
+            'driver' => 'sqlite',
+            'database' => ':memory:',
+            'prefix' => '',
+        ]);
+        $app['config']->set('queue.default', 'sync');
+    }
+
+    protected function defineDatabaseMigrations(): void
+    {
+        // Testbench only runs the migration paths loaded here; provider-registered
+        // paths are not auto-run in tests. Load Hopper's own
+        // migrations plus the target-table fixtures the suite needs.
+        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+        $this->loadMigrationsFrom(__DIR__.'/Fixtures/migrations');
+    }
 }

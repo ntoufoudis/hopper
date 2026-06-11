@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
+use Ntoufoudis\Hopper\Enums\ResolutionType;
 use Ntoufoudis\Hopper\Enums\RunStatus;
 use Ntoufoudis\Hopper\Models\ImportRun;
 use Ntoufoudis\Hopper\Models\StagingRow;
-use Ntoufoudis\Hopper\Resolution\ResolutionType;
 
 it('casts status and computes progress', function () {
     $run = ImportRun::create([
