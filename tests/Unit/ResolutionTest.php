@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use Ntoufoudis\Hopper\Enums\RunStatus;
 use Ntoufoudis\Hopper\Enums\ResolutionType;
+use Ntoufoudis\Hopper\Enums\RunStatus;
 use Ntoufoudis\Hopper\Resolution\Resolution;
 
 it('builds a skip resolution with a reason and no model', function () {
