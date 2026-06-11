@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Ntoufoudis\Hopper\Tests;
 
 use Illuminate\Foundation\Application;
+use Maatwebsite\Excel\ExcelServiceProvider;
 use Ntoufoudis\Hopper\HopperServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
 
@@ -17,6 +18,7 @@ abstract class TestCase extends Orchestra
     protected function getPackageProviders($app): array
     {
         return [
+            ExcelServiceProvider::class,
             HopperServiceProvider::class,
         ];
     }
