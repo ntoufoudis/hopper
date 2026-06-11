@@ -18,3 +18,4 @@ breaking changes between any two versions - see upgrade notes per version.
 - Pest test harness (Testbench `TestCase` with the provider registered, `tests/Pest.php`) and a smoke test asserting the provider boots, config merges, and the config file publishes.
 - GitHub Actions CI (`.github/workflows/ci.yml`) running Pint (`--test`), PHPStan, and Pest across a PHP × Laravel matrix.
 - Migrations for `hopper_runs` (status, `import_definition`, source fingerprint, nullable actor, total/processed/inserted/updated/skipped/failed counts, timings) and `hopper_staging` (run_id, source_row_number, unique `row_hash`, JSON payload, resolution verdict, resolved_key, `committed_at`).
+- `Source` and `Resolver` contracts, the `Resolution` value object with the `ResolutionType` (Insert/Update/Skip) enum, and the `RunStatus` lifecycle enum (Pending → Staging → Ready → Importing → Completed, plus Failed/PartiallyCompleted).
