@@ -15,3 +15,4 @@ breaking changes between any two versions - see upgrade notes per version.
 - Package manifest `composer.json` for `ntoufoudis/hopper` (MIT): PHP `^8.3`, Laravel `^13` dependencies, `maatwebsite/excel`, dev tooling (Testbench, Pest, Larastan, Pint), PSR-4 autoloading, and Laravel package auto-discovery.
 - `HopperServiceProvider` registering the publishable `config/hopper.php` stub (`queue_connection`, `default_chunk_size`, `audit.driver`, `tables` map) and loading the (empty) package migrations' directory.
 - Quality tooling: `phpstan.neon` (Larastan, level 10, analyses `src`) and `pint.json` (Laravel preset).
+- Pest test harness (Testbench `TestCase` with the provider registered, `tests/Pest.php`) and a smoke test asserting the provider boots, config merges, and the config file publishes.
