@@ -27,3 +27,7 @@ breaking changes between any two versions - see upgrade notes per version.
 - `Committer` (chunked, per-chunk-transactional replay of uncommitted staging rows into the target, stamping `committed_at` and incrementing run counters), the `CommitChunk` job, and `ImportRun::commit()` which transitions a run to Importing → Completed.
 - GATE 1b checkpoint: end-to-end happy-path CSV import (stage → commit) verified with correct run counts.
 - Hardening test coverage for M1: idempotent re-staging, resumable commit with no double-inserts, and progress math - completing the resolve-once / replay-later core engine for CSV.
+
+### Fixed
+
+- Staging on the `sync` queue no longer throws `FiberError: Cannot switch fibers in current execution context` on PHP 8.3. `PendingImport::stage()` now dispatches `StageChunk` via the bus instead of `StageChunk::dispatch()`, so the job runs in the normal call stack rather than inside `PendingDispatch::__destruct()` - PHP < 8.4 forbids switching `CsvSource`'s Fiber from within a destructor. Queue behaviour is unchanged on real connections.
