@@ -26,3 +26,4 @@ breaking changes between any two versions - see upgrade notes per version.
 - `Hopper` facade with `HopperManager::define()`, the `PendingImport` builder (`from()` / `stage()`), and the idempotent `StageChunk` job that drives `StagingWriter` and transitions a run Pending → Staging → Ready.
 - `Committer` (chunked, per-chunk-transactional replay of uncommitted staging rows into the target, stamping `committed_at` and incrementing run counters), the `CommitChunk` job, and `ImportRun::commit()` which transitions a run to Importing → Completed.
 - GATE 1b checkpoint: end-to-end happy-path CSV import (stage → commit) verified with correct run counts.
+- Hardening test coverage for M1: idempotent re-staging, resumable commit with no double-inserts, and progress math - completing the resolve-once / replay-later core engine for CSV.
