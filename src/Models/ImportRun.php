@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Config;
 use Ntoufoudis\Hopper\Enums\RunStatus;
 
 /**
+ * @property int $id
  * @property RunStatus $status
  * @property string $import_definition
  * @property string $source_fingerprint

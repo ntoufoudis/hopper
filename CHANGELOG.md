@@ -22,3 +22,4 @@ breaking changes between any two versions - see upgrade notes per version.
 - `ImportRun` model (status cast, `progress()` returning processed/total/percentage) and `StagingRow` model (payload-array and resolution-enum casts), both bound to the configured `hopper_*` table names.
 - Minimal `ImportDefinition` (model/resolver/chunkSize) and `InsertOnlyResolver` (every row resolves to Insert).
 - `CsvSource`: streams a CSV through `maatwebsite/excel`'s chunk reader, bridged to a pull-based generator via a PHP Fiber; exposes ordered headers, header-keyed rows numbered from 1, and a content-based fingerprint.
+- `StagingWriter`: streams a source in chunks, resolves each row, and upserts it into `hopper_staging` keyed on `row_hash` (`hash(fingerprint + rowNumber)`), making re-staging idempotent; records the run's total row count.
