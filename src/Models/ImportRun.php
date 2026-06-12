@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Config;
 use Ntoufoudis\Hopper\Enums\RunStatus;
+use Ntoufoudis\Hopper\Jobs\CommitChunk;
 
 /**
  * @property int $id
@@ -62,5 +63,14 @@ final class ImportRun extends Model
             'total' => $total,
             'percentage' => $total > 0 ? (int) round($processed / $total * 100) : 0,
         ];
+    }
+
+    public function commit(): self
+    {
+        $this->update(['status' => RunStatus::Importing]);
+
+        CommitChunk::dispatch($this);
+
+        return $this;
     }
 }
