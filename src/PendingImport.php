@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ntoufoudis\Hopper;
 
+use Illuminate\Support\Facades\Bus;
 use Ntoufoudis\Hopper\Contracts\Source;
 use Ntoufoudis\Hopper\Enums\RunStatus;
 use Ntoufoudis\Hopper\Jobs\StageChunk;
@@ -34,7 +35,12 @@ final class PendingImport
             'source_fingerprint' => $this->source->fingerprint(),
         ]);
 
-        StageChunk::dispatch($run, $this->source);
+        // Dispatch through the bus (not StageChunk::dispatch) so the job never
+        // runs inside PendingDispatch::__destruct(). On the sync connection the
+        // handler executes in this stack frame; on a real queue it is enqueued.
+        // Driving CsvSource's Fiber from a destructor throws "Cannot switch
+        // fibers in current execution context" on PHP < 8.4.
+        Bus::dispatch(new StageChunk($run, $this->source));
 
         return $run->refresh();
     }
