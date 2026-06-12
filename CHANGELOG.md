@@ -25,3 +25,4 @@ breaking changes between any two versions - see upgrade notes per version.
 - `StagingWriter`: streams a source in chunks, resolves each row, and upserts it into `hopper_staging` keyed on `row_hash` (`hash(fingerprint + rowNumber)`), making re-staging idempotent; records the run's total row count.
 - `Hopper` facade with `HopperManager::define()`, the `PendingImport` builder (`from()` / `stage()`), and the idempotent `StageChunk` job that drives `StagingWriter` and transitions a run Pending → Staging → Ready.
 - `Committer` (chunked, per-chunk-transactional replay of uncommitted staging rows into the target, stamping `committed_at` and incrementing run counters), the `CommitChunk` job, and `ImportRun::commit()` which transitions a run to Importing → Completed.
+- GATE 1b checkpoint: end-to-end happy-path CSV import (stage → commit) verified with correct run counts.
