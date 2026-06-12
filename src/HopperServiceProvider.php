@@ -11,6 +11,8 @@ final class HopperServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->mergeConfigFrom(__DIR__.'/../config/hopper.php', 'hopper');
+
+        $this->app->singleton(HopperManager::class);
     }
 
     public function boot(): void
