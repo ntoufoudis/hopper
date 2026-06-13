@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Ntoufoudis\Hopper\Mapping;
 
 use Ntoufoudis\Hopper\Contracts\MappingStrategy;
+use Ntoufoudis\Hopper\Models\MappingTemplate;
 
 final class Mapper
 {
@@ -56,5 +57,39 @@ final class Mapper
         }
 
         return new ColumnMap($map);
+    }
+
+    /**
+     * Template-first resolution: reuse a saved map for this (signature,
+     * definition) pair; otherwise run strategies and persist the result so the
+     * next import of the same source layout is zero-touch.
+     *
+     * @param  list<string>  $headers
+     * @param  list<string>  $targetFields
+     */
+    public function autoMap(string $signature, string $definition, array $headers, array $targetFields): ColumnMap
+    {
+        $template = MappingTemplate::query()
+            ->where('source_signature', $signature)
+            ->where('import_definition', $definition)
+            ->first();
+
+        if ($template !== null) {
+            return new ColumnMap($template->column_map);
+        }
+
+        $map = $this->strategyMap($headers, $targetFields);
+
+        $this->saveTemplate($signature, $definition, $map);
+
+        return $map;
+    }
+
+    public function saveTemplate(string $signature, string $definition, ColumnMap $map): MappingTemplate
+    {
+        return MappingTemplate::query()->updateOrCreate(
+            ['source_signature' => $signature, 'import_definition' => $definition],
+            ['column_map' => $map->toArray()],
+        );
     }
 }
