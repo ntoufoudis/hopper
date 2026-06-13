@@ -35,6 +35,22 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Mapping
+    |--------------------------------------------------------------------------
+    | Header-to-field mapping. "aliases" is a field => known-header-spellings
+    | dictionary used by AliasMatch. "fuzzy_threshold" is the minimum similarity
+    | (0.0–1.0) FuzzyMatch requires before it proposes a field.
+    */
+    'mapping' => [
+        'aliases' => [
+            'email' => ['e-mail', 'e-mail address', 'email address', 'mail'],
+            'name' => ['full name', 'customer name'],
+        ],
+        'fuzzy_threshold' => 0.8,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Tables
     |--------------------------------------------------------------------------
     | Names for every hopper_* table. Override to namespace within a shared DB.
