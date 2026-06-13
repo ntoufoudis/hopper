@@ -28,6 +28,7 @@ breaking changes between any two versions - see upgrade notes per version.
 - GATE 1b checkpoint: end-to-end happy-path CSV import (stage → commit) verified with correct run counts.
 - Hardening test coverage for M1: idempotent re-staging, resumable commit with no double-inserts, and progress math - completing the resolve-once / replay-later core engine for CSV.
 - Mapping contracts and value objects: the `MappingStrategy` contract, the readonly `MappingSuggestion` VO (field/confidence/strategy), and the iterable `ColumnMap` (source-header → target-field).
+- Mapping strategies - `ExactMatch` (case-insensitive header/field equality), `AliasMatch` (config-driven synonym dictionary), and `FuzzyMatch` (normalised Levenshtein with a configurable threshold) - plus the `AiMatch` premium seam (returns `null`, not wired into the default chain) and a `hopper.mapping` config block (aliases + `fuzzy_threshold`).
 
 ### Fixed
 
