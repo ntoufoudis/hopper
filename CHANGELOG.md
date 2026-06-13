@@ -29,6 +29,7 @@ breaking changes between any two versions - see upgrade notes per version.
 - Hardening test coverage for M1: idempotent re-staging, resumable commit with no double-inserts, and progress math - completing the resolve-once / replay-later core engine for CSV.
 - Mapping contracts and value objects: the `MappingStrategy` contract, the readonly `MappingSuggestion` VO (field/confidence/strategy), and the iterable `ColumnMap` (source-header → target-field).
 - Mapping strategies - `ExactMatch` (case-insensitive header/field equality), `AliasMatch` (config-driven synonym dictionary), and `FuzzyMatch` (normalised Levenshtein with a configurable threshold) - plus the `AiMatch` premium seam (returns `null`, not wired into the default chain) and a `hopper.mapping` config block (aliases + `fuzzy_threshold`).
+- `Mapper` service: runs registered strategies in priority order (first non-null wins), assembling a `ColumnMap` and exposing per-header `MappingSuggestion` confidence; bound with the default Exact→Alias→Fuzzy chain (AiMatch excluded).
 
 ### Fixed
 

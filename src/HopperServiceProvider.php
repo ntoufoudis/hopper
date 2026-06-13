@@ -4,7 +4,12 @@ declare(strict_types=1);
 
 namespace Ntoufoudis\Hopper;
 
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\ServiceProvider;
+use Ntoufoudis\Hopper\Mapping\Mapper;
+use Ntoufoudis\Hopper\Mapping\Strategies\AliasMatch;
+use Ntoufoudis\Hopper\Mapping\Strategies\ExactMatch;
+use Ntoufoudis\Hopper\Mapping\Strategies\FuzzyMatch;
 
 final class HopperServiceProvider extends ServiceProvider
 {
@@ -13,6 +18,29 @@ final class HopperServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__.'/../config/hopper.php', 'hopper');
 
         $this->app->singleton(HopperManager::class);
+
+        $this->app->singleton(Mapper::class, function (): Mapper {
+            /** @var array<string, list<string>> $aliases */
+            $aliases = [];
+
+            foreach (Config::array('hopper.mapping.aliases') as $field => $list) {
+                $values = [];
+
+                foreach ((array) $list as $alias) {
+                    if (is_scalar($alias)) {
+                        $values[] = (string) $alias;
+                    }
+                }
+
+                $aliases[(string) $field] = $values;
+            }
+
+            return new Mapper([
+                new ExactMatch,
+                new AliasMatch($aliases),
+                new FuzzyMatch(Config::float('hopper.mapping.fuzzy_threshold')),
+            ]);
+        });
     }
 
     public function boot(): void
