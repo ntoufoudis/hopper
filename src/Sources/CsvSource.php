@@ -9,6 +9,7 @@ use Illuminate\Http\UploadedFile;
 use Maatwebsite\Excel\Excel;
 use Maatwebsite\Excel\Facades\Excel as ExcelFacade;
 use Maatwebsite\Excel\HeadingRowImport;
+use Maatwebsite\Excel\Imports\HeadingRowFormatter;
 use Ntoufoudis\Hopper\Contracts\Source;
 use Throwable;
 
@@ -33,6 +34,9 @@ final class CsvSource implements Source
      */
     public function headers(): array
     {
+        // Read header labels verbatim; mapping keys off the original spelling.
+        HeadingRowFormatter::default('none');
+
         $sheets = (new HeadingRowImport)->toArray($this->path, null, Excel::CSV);
 
         $first = data_get($sheets, '0.0', []);
@@ -54,6 +58,9 @@ final class CsvSource implements Source
      */
     public function rows(): iterable
     {
+        // Keep row keys identical to headers() so ColumnMap lookups line up.
+        HeadingRowFormatter::default('none');
+
         $fiber = new Fiber(function (): void {
             ExcelFacade::import(
                 new RowStreamImport(

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Date;
 use JsonException;
 use Ntoufoudis\Hopper\Contracts\Source;
 use Ntoufoudis\Hopper\ImportDefinition;
+use Ntoufoudis\Hopper\Mapping\ColumnMap;
 use Ntoufoudis\Hopper\Models\ImportRun;
 use Ntoufoudis\Hopper\Models\StagingRow;
 
@@ -16,7 +17,7 @@ final class StagingWriter
     /**
      * @throws JsonException
      */
-    public function write(ImportRun $run, Source $source, ImportDefinition $definition): void
+    public function write(ImportRun $run, Source $source, ImportDefinition $definition, ?ColumnMap $map = null): void
     {
         $resolver = $definition->resolver();
         $fingerprint = $source->fingerprint();
@@ -26,6 +27,10 @@ final class StagingWriter
         $buffer = [];
 
         foreach ($source->rows() as $rowNumber => $row) {
+            if ($map !== null) {
+                $row = $this->applyMap($row, $map);
+            }
+
             $resolution = $resolver->resolve($row);
             $now = Date::now();
 
@@ -51,6 +56,26 @@ final class StagingWriter
         }
 
         $run->update(['total' => StagingRow::where('run_id', $run->id)->count()]);
+    }
+
+    /**
+     * Rewrite a row's keys from source header to target field, dropping any
+     * header the map does not cover.
+     *
+     * @param  array<string, scalar|null>  $row
+     * @return array<string, scalar|null>
+     */
+    protected function applyMap(array $row, ColumnMap $map): array
+    {
+        $mapped = [];
+
+        foreach ($map as $header => $field) {
+            if (array_key_exists($header, $row)) {
+                $mapped[$field] = $row[$header];
+            }
+        }
+
+        return $mapped;
     }
 
     /**

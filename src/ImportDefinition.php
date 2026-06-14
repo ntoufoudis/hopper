@@ -13,6 +13,18 @@ abstract class ImportDefinition
     /** @return class-string<Model> */
     abstract public function model(): string;
 
+    /**
+     * Target fields a source maps onto. Defaults to the model's fillable.
+     *
+     * @return list<string>
+     */
+    public function fields(): array
+    {
+        $model = new ($this->model());
+
+        return array_values($model->getFillable());
+    }
+
     public function resolver(): Resolver
     {
         return new InsertOnlyResolver;
