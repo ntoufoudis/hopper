@@ -13,6 +13,7 @@ use JsonException;
 use Ntoufoudis\Hopper\Contracts\Source;
 use Ntoufoudis\Hopper\Enums\RunStatus;
 use Ntoufoudis\Hopper\ImportDefinition;
+use Ntoufoudis\Hopper\Mapping\ColumnMap;
 use Ntoufoudis\Hopper\Models\ImportRun;
 use Ntoufoudis\Hopper\Staging\StagingWriter;
 
@@ -23,6 +24,7 @@ final class StageChunk implements ShouldQueue
     public function __construct(
         public ImportRun $run,
         public Source $source,
+        public ?ColumnMap $columnMap = null,
     ) {
         //
     }
@@ -37,7 +39,7 @@ final class StageChunk implements ShouldQueue
         /** @var ImportDefinition $definition */
         $definition = new ($this->run->import_definition);
 
-        $writer->write($this->run, $this->source, $definition);
+        $writer->write($this->run, $this->source, $definition, $this->columnMap);
 
         $this->run->update(['status' => RunStatus::Ready]);
     }

@@ -31,6 +31,7 @@ breaking changes between any two versions - see upgrade notes per version.
 - Mapping strategies - `ExactMatch` (case-insensitive header/field equality), `AliasMatch` (config-driven synonym dictionary), and `FuzzyMatch` (normalised Levenshtein with a configurable threshold) - plus the `AiMatch` premium seam (returns `null`, not wired into the default chain) and a `hopper.mapping` config block (aliases + `fuzzy_threshold`).
 - `Mapper` service: runs registered strategies in priority order (first non-null wins), assembling a `ColumnMap` and exposing per-header `MappingSuggestion` confidence; bound with the default Exact→Alias→Fuzzy chain (AiMatch excluded).
 - `hopper_mapping_templates` migration and `MappingTemplate` model (unique `source_signature` + `import_definition`, `column_map` json), plus template persistence on `Mapper` - `autoMap()` reuses a saved template before falling back to strategies and `saveTemplate()` records a confirmed map.
+- Column-mapping wiring through staging: `ImportDefinition::fields()` (defaults to the model's fillable), `StagingWriter` remaps each row's headers to target fields when a `ColumnMap` is present, `StageChunk` carries the map, and the `Hopper` builder gains `->map()` (explicit) and `->autoMap()` (template-then-strategies, persisting new templates).
 
 ### Fixed
 
