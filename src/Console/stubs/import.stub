@@ -1,0 +1,49 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{ namespace }};
+
+use Illuminate\Database\Eloquent\Model;
+use Ntoufoudis\Hopper\Contracts\Resolver;
+use Ntoufoudis\Hopper\ImportDefinition;
+use Ntoufoudis\Hopper\Resolution\InsertOnlyResolver;
+
+final class {{ class }} extends ImportDefinition
+{
+    /**
+     * The target Eloquent model for this import.
+     *
+     * @return class-string<Model>
+     */
+    public function model(): string
+    {
+        // TODO: return your target model, e.g. \App\Models\Customer::class
+        return \App\Models\Model::class;
+    }
+
+    /**
+     * Per-row validation rules (applied from M3 onward).
+     *
+     * @return array<string, mixed>
+     */
+    public function rules(): array
+    {
+        return [];
+    }
+
+    /**
+     * Row transformation pipes (applied from M3 onward).
+     *
+     * @return list<class-string>
+     */
+    public function pipes(): array
+    {
+        return [];
+    }
+
+    public function resolver(): Resolver
+    {
+        return new InsertOnlyResolver;
+    }
+}

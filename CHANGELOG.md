@@ -18,20 +18,21 @@ breaking changes between any two versions - see upgrade notes per version.
 - Pest test harness (Testbench `TestCase` with the provider registered, `tests/Pest.php`) and a smoke test asserting the provider boots, config merges, and the config file publishes.
 - GitHub Actions CI (`.github/workflows/ci.yml`) running Pint (`--test`), PHPStan, and Pest across a PHP × Laravel matrix.
 - Migrations for `hopper_runs` (status, `import_definition`, source fingerprint, nullable actor, total/processed/inserted/updated/skipped/failed counts, timings) and `hopper_staging` (run_id, source_row_number, unique `row_hash`, JSON payload, resolution verdict, resolved_key, `committed_at`).
-- `Source` and `Resolver` contracts, the `Resolution` value object with the `ResolutionType` (Insert/Update/Skip) enum, and the `RunStatus` lifecycle enum (Pending → Staging → Ready → Importing → Completed, plus Failed/PartiallyCompleted).
+- `Source` and `Resolver` contracts, the `Resolution` value object with the `ResolutionType` (Insert/Update/Skip) enum, and the `RunStatus` lifecycle enum (Pending -> Staging -> Ready -> Importing -> Completed, plus Failed/PartiallyCompleted).
 - `ImportRun` model (status cast, `progress()` returning processed/total/percentage) and `StagingRow` model (payload-array and resolution-enum casts), both bound to the configured `hopper_*` table names.
 - Minimal `ImportDefinition` (model/resolver/chunkSize) and `InsertOnlyResolver` (every row resolves to Insert).
 - `CsvSource`: streams a CSV through `maatwebsite/excel`'s chunk reader, bridged to a pull-based generator via a PHP Fiber; exposes ordered headers, header-keyed rows numbered from 1, and a content-based fingerprint.
 - `StagingWriter`: streams a source in chunks, resolves each row, and upserts it into `hopper_staging` keyed on `row_hash` (`hash(fingerprint + rowNumber)`), making re-staging idempotent; records the run's total row count.
-- `Hopper` facade with `HopperManager::define()`, the `PendingImport` builder (`from()` / `stage()`), and the idempotent `StageChunk` job that drives `StagingWriter` and transitions a run Pending → Staging → Ready.
-- `Committer` (chunked, per-chunk-transactional replay of uncommitted staging rows into the target, stamping `committed_at` and incrementing run counters), the `CommitChunk` job, and `ImportRun::commit()` which transitions a run to Importing → Completed.
-- GATE 1b checkpoint: end-to-end happy-path CSV import (stage → commit) verified with correct run counts.
+- `Hopper` facade with `HopperManager::define()`, the `PendingImport` builder (`from()` / `stage()`), and the idempotent `StageChunk` job that drives `StagingWriter` and transitions a run Pending -> Staging -> Ready.
+- `Committer` (chunked, per-chunk-transactional replay of uncommitted staging rows into the target, stamping `committed_at` and incrementing run counters), the `CommitChunk` job, and `ImportRun::commit()` which transitions a run to Importing -> Completed.
+- GATE 1b checkpoint: end-to-end happy-path CSV import (stage -> commit) verified with correct run counts.
 - Hardening test coverage for M1: idempotent re-staging, resumable commit with no double-inserts, and progress math - completing the resolve-once / replay-later core engine for CSV.
-- Mapping contracts and value objects: the `MappingStrategy` contract, the readonly `MappingSuggestion` VO (field/confidence/strategy), and the iterable `ColumnMap` (source-header → target-field).
+- Mapping contracts and value objects: the `MappingStrategy` contract, the readonly `MappingSuggestion` VO (field/confidence/strategy), and the iterable `ColumnMap` (source-header -> target-field).
 - Mapping strategies - `ExactMatch` (case-insensitive header/field equality), `AliasMatch` (config-driven synonym dictionary), and `FuzzyMatch` (normalised Levenshtein with a configurable threshold) - plus the `AiMatch` premium seam (returns `null`, not wired into the default chain) and a `hopper.mapping` config block (aliases + `fuzzy_threshold`).
-- `Mapper` service: runs registered strategies in priority order (first non-null wins), assembling a `ColumnMap` and exposing per-header `MappingSuggestion` confidence; bound with the default Exact→Alias→Fuzzy chain (AiMatch excluded).
+- `Mapper` service: runs registered strategies in priority order (first non-null wins), assembling a `ColumnMap` and exposing per-header `MappingSuggestion` confidence; bound with the default Exact->Alias->Fuzzy chain (AiMatch excluded).
 - `hopper_mapping_templates` migration and `MappingTemplate` model (unique `source_signature` + `import_definition`, `column_map` json), plus template persistence on `Mapper` - `autoMap()` reuses a saved template before falling back to strategies and `saveTemplate()` records a confirmed map.
 - Column-mapping wiring through staging: `ImportDefinition::fields()` (defaults to the model's fillable), `StagingWriter` remaps each row's headers to target fields when a `ColumnMap` is present, `StageChunk` carries the map, and the `Hopper` builder gains `->map()` (explicit) and `->autoMap()` (template-then-strategies, persisting new templates).
+- `make:import` Artisan generator that scaffolds an `ImportDefinition` stub (`model()`, `rules()`, `pipes()`, `resolver()`) under the application's `App\Hopper` namespace.
 
 ### Fixed
 
