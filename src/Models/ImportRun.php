@@ -4,11 +4,15 @@ declare(strict_types=1);
 
 namespace Ntoufoudis\Hopper\Models;
 
+use Illuminate\Contracts\Container\BindingResolutionException;
+use Illuminate\Contracts\Container\CircularDependencyException;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Config;
 use Ntoufoudis\Hopper\Enums\RunStatus;
 use Ntoufoudis\Hopper\Jobs\CommitChunk;
+use Ntoufoudis\Hopper\Staging\ImportPreview;
+use Ntoufoudis\Hopper\Staging\PreviewBuilder;
 
 /**
  * @property int $id
@@ -63,6 +67,15 @@ final class ImportRun extends Model
             'total' => $total,
             'percentage' => $total > 0 ? (int) round($processed / $total * 100) : 0,
         ];
+    }
+
+    /**
+     * @throws CircularDependencyException
+     * @throws BindingResolutionException
+     */
+    public function preview(): ImportPreview
+    {
+        return app(PreviewBuilder::class)->build($this);
     }
 
     public function commit(): self
