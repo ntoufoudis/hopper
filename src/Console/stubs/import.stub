@@ -23,7 +23,8 @@ final class {{ class }} extends ImportDefinition
     }
 
     /**
-     * Per-row validation rules (applied from M3 onward).
+     * Per-row validation rules, keyed by target field. Invalid rows are
+     * diverted to the failed-row store.
      *
      * @return array<string, mixed>
      */
@@ -33,7 +34,7 @@ final class {{ class }} extends ImportDefinition
     }
 
     /**
-     * Row transformation pipes (applied from M3 onward).
+     * Row transformation pipes, applied (in order) before validation.
      *
      * @return list<class-string>
      */

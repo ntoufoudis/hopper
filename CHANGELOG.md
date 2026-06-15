@@ -34,6 +34,18 @@ breaking changes between any two versions - see upgrade notes per version.
 - Column-mapping wiring through staging: `ImportDefinition::fields()` (defaults to the model's fillable), `StagingWriter` remaps each row's headers to target fields when a `ColumnMap` is present, `StageChunk` carries the map, and the `Hopper` builder gains `->map()` (explicit) and `->autoMap()` (template-then-strategies, persisting new templates).
 - `make:import` Artisan generator that scaffolds an `ImportDefinition` stub (`model()`, `rules()`, `pipes()`, `resolver()`) under the application's `App\Hopper` namespace.
 - Integration coverage for M2: `autoMap()` stages a header-mismatched CSV into the correct target fields (and commits correctly), and a second import of the same source signature reuses the persisted template with zero re-mapping.
+- The `Pipe` transformation contract (`handle($row, Closure $next)`, Illuminate `Pipeline`-compatible) and the `RowRejected` exception a pipe throws to drop a row with a reason destined for the failed-row report.
+- `PipeRunner`: drives a definition's `pipes()` through Laravel's `Pipeline` (class-string or instance pipes), returning the transformed row and letting a `RowRejected` propagate to the caller.
+- `ImportDefinition::rules()` (per-row Laravel validation rules) and `::pipes()` (ordered transformation pipes) defaults, both empty by default; the `make:import` stub now describes them as live behaviour.
+- `hopper_failed_rows` migration (run_id, source_row_number, unique `row_hash`, JSON payload, reason) and the `FailedRow` model (payload-array cast, configured table name) - the diversion sink for rejected and invalid rows.
+- The abstract `DatabaseResolver` base: batch-aware matching by a single field - `useModel()` + `prime()` issue one keyed `whereIn` per chunk and cache matches in memory, so `resolve()` never queries per row (the public single-row `Resolver` contract is unchanged).
+- `StagingWriter` lifecycle rebuilt to `map -> transform -> validate -> resolve -> stage`: it runs each row through the definition's `pipes()` and `rules()`, diverts rejected (`RowRejected`) and invalid rows to `hopper_failed_rows` with their reason (never staging them), and buffers valid rows into chunks so a batch-aware resolver is primed once per chunk. The run's `total` and `failed` counts are recorded on completion; diversion is idempotent on `row_hash`.
+- `UpsertResolver::by($field)`: updates a matched record with the incoming row's values, or inserts when no match exists.
+- `MergeResolver::by($field)`: field-level merge of existing and incoming records - non-blank incoming values win, existing values survive where the incoming value is blank - falling back to Insert when no match exists.
+- `CallbackResolver`: a closure-driven resolver escape hatch (`new CallbackResolver(fn (array $row) => new Resolution(...))`) for verdicts that do not fit upsert/merge.
+- Resolver batching + counts coverage: a writer-level query-count assertion proving exactly one keyed `whereIn` per chunk during staging (no per-row queries), and a stage->commit test verifying correct insert/update counts for `UpsertResolver`.
+- `FailedRowExporter`: renders a run's `hopper_failed_rows` as a CSV (union of payload columns plus a final `error` column), guarding against spreadsheet formula injection by tab-prefixing any cell that begins with `=`, `+`, `-`, or `@`.
+- End-to-end M3 coverage through the public builder: `Hopper::define()->from()->stage()` runs a messy CSV through transform→validate→stage, diverting rejected and invalid rows, and the resulting failed rows export with their reasons.
 
 ### Fixed
 
