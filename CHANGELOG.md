@@ -42,6 +42,7 @@ breaking changes between any two versions - see upgrade notes per version.
 - `StagingWriter` lifecycle rebuilt to `map -> transform -> validate -> resolve -> stage`: it runs each row through the definition's `pipes()` and `rules()`, diverts rejected (`RowRejected`) and invalid rows to `hopper_failed_rows` with their reason (never staging them), and buffers valid rows into chunks so a batch-aware resolver is primed once per chunk. The run's `total` and `failed` counts are recorded on completion; diversion is idempotent on `row_hash`.
 - `UpsertResolver::by($field)`: updates a matched record with the incoming row's values, or inserts when no match exists.
 - `MergeResolver::by($field)`: field-level merge of existing and incoming records - non-blank incoming values win, existing values survive where the incoming value is blank - falling back to Insert when no match exists.
+- `CallbackResolver`: a closure-driven resolver escape hatch (`new CallbackResolver(fn (array $row) => new Resolution(...))`) for verdicts that do not fit upsert/merge.
 
 ### Fixed
 
