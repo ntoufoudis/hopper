@@ -39,6 +39,7 @@ breaking changes between any two versions - see upgrade notes per version.
 - `ImportDefinition::rules()` (per-row Laravel validation rules) and `::pipes()` (ordered transformation pipes) defaults, both empty by default; the `make:import` stub now describes them as live behaviour.
 - `hopper_failed_rows` migration (run_id, source_row_number, unique `row_hash`, JSON payload, reason) and the `FailedRow` model (payload-array cast, configured table name) - the diversion sink for rejected and invalid rows.
 - The abstract `DatabaseResolver` base: batch-aware matching by a single field - `useModel()` + `prime()` issue one keyed `whereIn` per chunk and cache matches in memory, so `resolve()` never queries per row (the public single-row `Resolver` contract is unchanged).
+- `StagingWriter` lifecycle rebuilt to `map -> transform -> validate -> resolve -> stage`: it runs each row through the definition's `pipes()` and `rules()`, diverts rejected (`RowRejected`) and invalid rows to `hopper_failed_rows` with their reason (never staging them), and buffers valid rows into chunks so a batch-aware resolver is primed once per chunk. The run's `total` and `failed` counts are recorded on completion; diversion is idempotent on `row_hash`.
 
 ### Fixed
 
