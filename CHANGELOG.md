@@ -55,6 +55,7 @@ breaking changes between any two versions - see upgrade notes per version.
 - The `AuditDriver` contract (`record(ImportEvent)`) and the readonly `ImportEvent` value object (event name, optional run id, structured context) - the swappable governed-audit seam, mirroring the Custodian pattern.
 - `DatabaseAuditDriver` (the default) and the `AuditDriver` container binding driven by `hopper.audit.driver`: `database` records each `ImportEvent` to `hopper_audit`; `chronicle` is only selectable when `laravel-chronicle/core` is installed (otherwise a clear runtime error).
 - Lifecycle audit emission wired through the engine: `run.created` and `mapping.resolved` (`PendingImport`), `row.rejected` (`StagingWriter`), `preview.generated` (`PreviewBuilder`), and `commit.started` / `commit.completed` / `commit.failed` (`Committer`, with the run marked `Failed` and the error captured on a thrown commit) - each recorded through the configured `AuditDriver`.
+- `ChronicleAuditDriver`: an opt-in audit driver that forwards each `ImportEvent` to Chronicle for tamper-evident, signed import history. It stays a soft dependency - selectable only when `laravel-chronicle/core` is installed, excluded from static analysis, and its install-path test skipped when the package is absent.
 
 ### Fixed
 

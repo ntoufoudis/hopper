@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Ntoufoudis\Hopper;
 
 use Illuminate\Console\Application as Artisan;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\ServiceProvider;
 use Ntoufoudis\Hopper\Audit\ChronicleAuditDriver;
@@ -48,7 +49,7 @@ final class HopperServiceProvider extends ServiceProvider
             ]);
         });
 
-        $this->app->singleton(AuditDriver::class, function ($app): AuditDriver {
+        $this->app->singleton(AuditDriver::class, function (Application $app): AuditDriver {
             return match (Config::string('hopper.audit.driver')) {
                 'chronicle' => class_exists('Chronicle\\Facades\\Chronicle')
                     ? $app->make(ChronicleAuditDriver::class)
