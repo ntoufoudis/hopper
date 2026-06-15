@@ -51,6 +51,7 @@ breaking changes between any two versions - see upgrade notes per version.
 - Preview/commit parity coverage: a pre-seeded upsert import asserts `preview()` insert/update/skip counts exactly equal the subsequent `commit()` results - the correctness property the resolve-once/replay-later staging model exists to guarantee.
 - `ExcelSource`: streams `xlsx`/`xls` through `maatwebsite/excel`'s chunk reader (auto-detecting the reader from the file extension), bridged to a pull-based generator via a Fiber - the same `Source` contract, ordered headers, header-keyed rows, and content fingerprint as `CsvSource`.
 - End-to-end M4 coverage: an `xlsx` import runs through the full map->transform->validate->resolve->stage->commit pipeline via `ExcelSource`, with preview/commit parity and correct insert/update counts - proving the second source format reuses the M1–M3 engine unchanged.
+- `hopper_audit` migration (`run_id`, `event`, JSON `context`, `occurred_at`) and the `AuditEvent` model (context-array and datetime casts, configured table name) - the default audit driver's sink.
 
 ### Fixed
 
