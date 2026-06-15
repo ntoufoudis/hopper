@@ -49,6 +49,7 @@ breaking changes between any two versions - see upgrade notes per version.
 - The readonly `ImportPreview` value object (total / valid / errors / inserts / updates / skips, with `toArray()`) - the pre-commit count surface for a run.
 - `PreviewBuilder` and `ImportRun::preview()`: an exact, free pre-commit preview built from a single `GROUP BY resolution` over `hopper_staging` plus a `hopper_failed_rows` count - reading persisted verdicts only, never re-querying the target.
 - Preview/commit parity coverage: a pre-seeded upsert import asserts `preview()` insert/update/skip counts exactly equal the subsequent `commit()` results - the correctness property the resolve-once/replay-later staging model exists to guarantee.
+- `ExcelSource`: streams `xlsx`/`xls` through `maatwebsite/excel`'s chunk reader (auto-detecting the reader from the file extension), bridged to a pull-based generator via a Fiber - the same `Source` contract, ordered headers, header-keyed rows, and content fingerprint as `CsvSource`.
 
 ### Fixed
 
