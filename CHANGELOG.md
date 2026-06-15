@@ -35,6 +35,7 @@ breaking changes between any two versions - see upgrade notes per version.
 - `make:import` Artisan generator that scaffolds an `ImportDefinition` stub (`model()`, `rules()`, `pipes()`, `resolver()`) under the application's `App\Hopper` namespace.
 - Integration coverage for M2: `autoMap()` stages a header-mismatched CSV into the correct target fields (and commits correctly), and a second import of the same source signature reuses the persisted template with zero re-mapping.
 - The `Pipe` transformation contract (`handle($row, Closure $next)`, Illuminate `Pipeline`-compatible) and the `RowRejected` exception a pipe throws to drop a row with a reason destined for the failed-row report.
+- `PipeRunner`: drives a definition's `pipes()` through Laravel's `Pipeline` (class-string or instance pipes), returning the transformed row and letting a `RowRejected` propagate to the caller.
 
 ### Fixed
 
