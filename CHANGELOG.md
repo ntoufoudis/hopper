@@ -48,6 +48,7 @@ breaking changes between any two versions - see upgrade notes per version.
 - End-to-end M3 coverage through the public builder: `Hopper::define()->from()->stage()` runs a messy CSV through transform→validate→stage, diverting rejected and invalid rows, and the resulting failed rows export with their reasons.
 - The readonly `ImportPreview` value object (total / valid / errors / inserts / updates / skips, with `toArray()`) - the pre-commit count surface for a run.
 - `PreviewBuilder` and `ImportRun::preview()`: an exact, free pre-commit preview built from a single `GROUP BY resolution` over `hopper_staging` plus a `hopper_failed_rows` count - reading persisted verdicts only, never re-querying the target.
+- Preview/commit parity coverage: a pre-seeded upsert import asserts `preview()` insert/update/skip counts exactly equal the subsequent `commit()` results - the correctness property the resolve-once/replay-later staging model exists to guarantee.
 
 ### Fixed
 
