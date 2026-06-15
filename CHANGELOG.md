@@ -46,6 +46,7 @@ breaking changes between any two versions - see upgrade notes per version.
 - Resolver batching + counts coverage: a writer-level query-count assertion proving exactly one keyed `whereIn` per chunk during staging (no per-row queries), and a stage->commit test verifying correct insert/update counts for `UpsertResolver`.
 - `FailedRowExporter`: renders a run's `hopper_failed_rows` as a CSV (union of payload columns plus a final `error` column), guarding against spreadsheet formula injection by tab-prefixing any cell that begins with `=`, `+`, `-`, or `@`.
 - End-to-end M3 coverage through the public builder: `Hopper::define()->from()->stage()` runs a messy CSV through transform→validate→stage, diverting rejected and invalid rows, and the resulting failed rows export with their reasons.
+- The readonly `ImportPreview` value object (total / valid / errors / inserts / updates / skips, with `toArray()`) - the pre-commit count surface for a run.
 
 ### Fixed
 
