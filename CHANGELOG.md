@@ -45,11 +45,12 @@ breaking changes between any two versions - see upgrade notes per version.
 - `CallbackResolver`: a closure-driven resolver escape hatch (`new CallbackResolver(fn (array $row) => new Resolution(...))`) for verdicts that do not fit upsert/merge.
 - Resolver batching + counts coverage: a writer-level query-count assertion proving exactly one keyed `whereIn` per chunk during staging (no per-row queries), and a stage->commit test verifying correct insert/update counts for `UpsertResolver`.
 - `FailedRowExporter`: renders a run's `hopper_failed_rows` as a CSV (union of payload columns plus a final `error` column), guarding against spreadsheet formula injection by tab-prefixing any cell that begins with `=`, `+`, `-`, or `@`.
-- End-to-end M3 coverage through the public builder: `Hopper::define()->from()->stage()` runs a messy CSV through transform→validate→stage, diverting rejected and invalid rows, and the resulting failed rows export with their reasons.
+- End-to-end M3 coverage through the public builder: `Hopper::define()->from()->stage()` runs a messy CSV through transform->validate->stage, diverting rejected and invalid rows, and the resulting failed rows export with their reasons.
 - The readonly `ImportPreview` value object (total / valid / errors / inserts / updates / skips, with `toArray()`) - the pre-commit count surface for a run.
 - `PreviewBuilder` and `ImportRun::preview()`: an exact, free pre-commit preview built from a single `GROUP BY resolution` over `hopper_staging` plus a `hopper_failed_rows` count - reading persisted verdicts only, never re-querying the target.
 - Preview/commit parity coverage: a pre-seeded upsert import asserts `preview()` insert/update/skip counts exactly equal the subsequent `commit()` results - the correctness property the resolve-once/replay-later staging model exists to guarantee.
 - `ExcelSource`: streams `xlsx`/`xls` through `maatwebsite/excel`'s chunk reader (auto-detecting the reader from the file extension), bridged to a pull-based generator via a Fiber - the same `Source` contract, ordered headers, header-keyed rows, and content fingerprint as `CsvSource`.
+- End-to-end M4 coverage: an `xlsx` import runs through the full map->transform->validate->resolve->stage->commit pipeline via `ExcelSource`, with preview/commit parity and correct insert/update counts - proving the second source format reuses the M1–M3 engine unchanged.
 
 ### Fixed
 
