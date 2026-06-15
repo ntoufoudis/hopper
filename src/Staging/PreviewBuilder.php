@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Ntoufoudis\Hopper\Staging;
 
+use Ntoufoudis\Hopper\Audit\ImportEvent;
+use Ntoufoudis\Hopper\Contracts\AuditDriver;
 use Ntoufoudis\Hopper\Enums\ResolutionType;
 use Ntoufoudis\Hopper\Models\FailedRow;
 use Ntoufoudis\Hopper\Models\ImportRun;
@@ -33,7 +35,7 @@ final class PreviewBuilder
         $valid = $inserts + $updates + $skips;
         $errors = FailedRow::query()->where('run_id', $run->id)->count();
 
-        return new ImportPreview(
+        $preview = new ImportPreview(
             total: $valid + $errors,
             valid: $valid,
             errors: $errors,
@@ -41,5 +43,9 @@ final class PreviewBuilder
             updates: $updates,
             skips: $skips,
         );
+
+        app(AuditDriver::class)->record(new ImportEvent('preview.generated', $run->id, $preview->toArray()));
+
+        return $preview;
     }
 }

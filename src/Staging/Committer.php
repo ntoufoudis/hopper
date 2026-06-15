@@ -6,25 +6,48 @@ namespace Ntoufoudis\Hopper\Staging;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Ntoufoudis\Hopper\Audit\ImportEvent;
+use Ntoufoudis\Hopper\Contracts\AuditDriver;
 use Ntoufoudis\Hopper\Enums\ResolutionType;
 use Ntoufoudis\Hopper\Enums\RunStatus;
 use Ntoufoudis\Hopper\ImportDefinition;
 use Ntoufoudis\Hopper\Models\ImportRun;
 use Ntoufoudis\Hopper\Models\StagingRow;
+use Throwable;
 
 final class Committer
 {
+    /**
+     * @throws Throwable
+     */
     public function commit(ImportRun $run): void
     {
         if ($run->status !== RunStatus::Importing) {
             $run->update(['status' => RunStatus::Importing]);
         }
 
-        while ($this->commitChunk($run) > 0) {
-            // Replay one chunk at a time until no uncommitted rows remain.
+        $audit = app(AuditDriver::class);
+        $audit->record(new ImportEvent('commit.started', $run->id));
+
+        try {
+            while ($this->commitChunk($run) > 0) {
+                // Replay one chunk at a time until no uncommitted rows remain.
+            }
+        } catch (Throwable $e) {
+            $run->update(['status' => RunStatus::Failed]);
+            $audit->record(new ImportEvent('commit.failed', $run->id, [
+                'error' => $e->getMessage(),
+            ]));
+
+            throw $e;
         }
 
         $run->update(['status' => RunStatus::Completed]);
+        $audit->record(new ImportEvent('commit.completed', $run->id, [
+            'inserted' => $run->inserted,
+            'updated' => $run->updated,
+            'skipped' => $run->skipped,
+        ]));
     }
 
     public function commitChunk(ImportRun $run): int

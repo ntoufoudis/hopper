@@ -7,6 +7,8 @@ namespace Ntoufoudis\Hopper\Staging;
 use Illuminate\Contracts\Validation\Factory as ValidationFactory;
 use Illuminate\Support\Facades\Date;
 use JsonException;
+use Ntoufoudis\Hopper\Audit\ImportEvent;
+use Ntoufoudis\Hopper\Contracts\AuditDriver;
 use Ntoufoudis\Hopper\Contracts\Resolver;
 use Ntoufoudis\Hopper\Contracts\Source;
 use Ntoufoudis\Hopper\Exceptions\RowRejected;
@@ -198,6 +200,11 @@ final class StagingWriter
             ['row_hash'],
             ['run_id', 'source_row_number', 'payload', 'reason', 'updated_at'],
         );
+
+        app(AuditDriver::class)->record(new ImportEvent('row.rejected', $run->id, [
+            'source_row_number' => $rowNumber,
+            'reason' => $reason,
+        ]));
     }
 
     /**
