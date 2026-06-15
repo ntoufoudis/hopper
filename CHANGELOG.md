@@ -34,6 +34,7 @@ breaking changes between any two versions - see upgrade notes per version.
 - Column-mapping wiring through staging: `ImportDefinition::fields()` (defaults to the model's fillable), `StagingWriter` remaps each row's headers to target fields when a `ColumnMap` is present, `StageChunk` carries the map, and the `Hopper` builder gains `->map()` (explicit) and `->autoMap()` (template-then-strategies, persisting new templates).
 - `make:import` Artisan generator that scaffolds an `ImportDefinition` stub (`model()`, `rules()`, `pipes()`, `resolver()`) under the application's `App\Hopper` namespace.
 - Integration coverage for M2: `autoMap()` stages a header-mismatched CSV into the correct target fields (and commits correctly), and a second import of the same source signature reuses the persisted template with zero re-mapping.
+- The `Pipe` transformation contract (`handle($row, Closure $next)`, Illuminate `Pipeline`-compatible) and the `RowRejected` exception a pipe throws to drop a row with a reason destined for the failed-row report.
 
 ### Fixed
 
