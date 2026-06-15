@@ -13,11 +13,11 @@ use Maatwebsite\Excel\Imports\HeadingRowFormatter;
 use Ntoufoudis\Hopper\Contracts\Source;
 use Throwable;
 
-final class CsvSource implements Source
+final readonly class CsvSource implements Source
 {
     private function __construct(
-        private string $path,
-        private int $chunkSize = 500,
+        protected string $path,
+        protected int $chunkSize = 500,
     ) {
         //
     }

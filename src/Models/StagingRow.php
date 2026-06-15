@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Config;
 use Ntoufoudis\Hopper\Enums\ResolutionType;
 
 /**
+ * @property int $source_row_number
+ * @property string $row_hash
  * @property array<string, mixed> $payload
  * @property ResolutionType $resolution
  * @property ?string $resolved_key

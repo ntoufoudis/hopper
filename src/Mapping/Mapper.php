@@ -7,13 +7,13 @@ namespace Ntoufoudis\Hopper\Mapping;
 use Ntoufoudis\Hopper\Contracts\MappingStrategy;
 use Ntoufoudis\Hopper\Models\MappingTemplate;
 
-final class Mapper
+final readonly class Mapper
 {
     /**
      * @param  list<MappingStrategy>  $strategies
      */
     public function __construct(
-        private array $strategies,
+        protected array $strategies,
     ) {
         //
     }

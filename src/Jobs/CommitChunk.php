@@ -11,6 +11,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Ntoufoudis\Hopper\Models\ImportRun;
 use Ntoufoudis\Hopper\Staging\Committer;
+use Throwable;
 
 final class CommitChunk implements ShouldQueue
 {
@@ -22,6 +23,9 @@ final class CommitChunk implements ShouldQueue
         //
     }
 
+    /**
+     * @throws Throwable
+     */
     public function handle(Committer $committer): void
     {
         $committer->commit($this->run);
