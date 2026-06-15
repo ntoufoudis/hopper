@@ -44,6 +44,7 @@ breaking changes between any two versions - see upgrade notes per version.
 - `MergeResolver::by($field)`: field-level merge of existing and incoming records - non-blank incoming values win, existing values survive where the incoming value is blank - falling back to Insert when no match exists.
 - `CallbackResolver`: a closure-driven resolver escape hatch (`new CallbackResolver(fn (array $row) => new Resolution(...))`) for verdicts that do not fit upsert/merge.
 - Resolver batching + counts coverage: a writer-level query-count assertion proving exactly one keyed `whereIn` per chunk during staging (no per-row queries), and a stage->commit test verifying correct insert/update counts for `UpsertResolver`.
+- `FailedRowExporter`: renders a run's `hopper_failed_rows` as a CSV (union of payload columns plus a final `error` column), guarding against spreadsheet formula injection by tab-prefixing any cell that begins with `=`, `+`, `-`, or `@`.
 
 ### Fixed
 
