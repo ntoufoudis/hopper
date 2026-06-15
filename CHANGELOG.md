@@ -36,6 +36,7 @@ breaking changes between any two versions - see upgrade notes per version.
 - Integration coverage for M2: `autoMap()` stages a header-mismatched CSV into the correct target fields (and commits correctly), and a second import of the same source signature reuses the persisted template with zero re-mapping.
 - The `Pipe` transformation contract (`handle($row, Closure $next)`, Illuminate `Pipeline`-compatible) and the `RowRejected` exception a pipe throws to drop a row with a reason destined for the failed-row report.
 - `PipeRunner`: drives a definition's `pipes()` through Laravel's `Pipeline` (class-string or instance pipes), returning the transformed row and letting a `RowRejected` propagate to the caller.
+- `ImportDefinition::rules()` (per-row Laravel validation rules) and `::pipes()` (ordered transformation pipes) defaults, both empty by default; the `make:import` stub now describes them as live behaviour.
 
 ### Fixed
 
