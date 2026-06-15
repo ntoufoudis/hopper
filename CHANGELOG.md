@@ -53,6 +53,7 @@ breaking changes between any two versions - see upgrade notes per version.
 - End-to-end M4 coverage: an `xlsx` import runs through the full map->transform->validate->resolve->stage->commit pipeline via `ExcelSource`, with preview/commit parity and correct insert/update counts - proving the second source format reuses the M1–M3 engine unchanged.
 - `hopper_audit` migration (`run_id`, `event`, JSON `context`, `occurred_at`) and the `AuditEvent` model (context-array and datetime casts, configured table name) - the default audit driver's sink.
 - The `AuditDriver` contract (`record(ImportEvent)`) and the readonly `ImportEvent` value object (event name, optional run id, structured context) - the swappable governed-audit seam, mirroring the Custodian pattern.
+- `DatabaseAuditDriver` (the default) and the `AuditDriver` container binding driven by `hopper.audit.driver`: `database` records each `ImportEvent` to `hopper_audit`; `chronicle` is only selectable when `laravel-chronicle/core` is installed (otherwise a clear runtime error).
 
 ### Fixed
 
