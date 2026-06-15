@@ -38,6 +38,7 @@ breaking changes between any two versions - see upgrade notes per version.
 - `PipeRunner`: drives a definition's `pipes()` through Laravel's `Pipeline` (class-string or instance pipes), returning the transformed row and letting a `RowRejected` propagate to the caller.
 - `ImportDefinition::rules()` (per-row Laravel validation rules) and `::pipes()` (ordered transformation pipes) defaults, both empty by default; the `make:import` stub now describes them as live behaviour.
 - `hopper_failed_rows` migration (run_id, source_row_number, unique `row_hash`, JSON payload, reason) and the `FailedRow` model (payload-array cast, configured table name) - the diversion sink for rejected and invalid rows.
+- The abstract `DatabaseResolver` base: batch-aware matching by a single field - `useModel()` + `prime()` issue one keyed `whereIn` per chunk and cache matches in memory, so `resolve()` never queries per row (the public single-row `Resolver` contract is unchanged).
 
 ### Fixed
 
