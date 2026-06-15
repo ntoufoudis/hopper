@@ -43,6 +43,7 @@ breaking changes between any two versions - see upgrade notes per version.
 - `UpsertResolver::by($field)`: updates a matched record with the incoming row's values, or inserts when no match exists.
 - `MergeResolver::by($field)`: field-level merge of existing and incoming records - non-blank incoming values win, existing values survive where the incoming value is blank - falling back to Insert when no match exists.
 - `CallbackResolver`: a closure-driven resolver escape hatch (`new CallbackResolver(fn (array $row) => new Resolution(...))`) for verdicts that do not fit upsert/merge.
+- Resolver batching + counts coverage: a writer-level query-count assertion proving exactly one keyed `whereIn` per chunk during staging (no per-row queries), and a stage->commit test verifying correct insert/update counts for `UpsertResolver`.
 
 ### Fixed
 
