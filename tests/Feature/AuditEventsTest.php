@@ -5,7 +5,7 @@ declare(strict_types=1);
 use Ntoufoudis\Hopper\Contracts\AuditDriver;
 use Ntoufoudis\Hopper\Hopper;
 use Ntoufoudis\Hopper\Sources\CsvSource;
-use Ntoufoudis\Hopper\Tests\Fixtures\PipelineCustomerImport;
+use Ntoufoudis\Hopper\Tests\Fixtures\Imports\PipelineCustomerImport;
 use Ntoufoudis\Hopper\Tests\Fixtures\RecordingAuditDriver;
 
 it('records the lifecycle events across a full import', function () {
@@ -15,7 +15,7 @@ it('records the lifecycle events across a full import', function () {
     // customers_messy.csv drives at least one rejected/invalid row through the
     // existing PipelineCustomerImport (transform + validation) fixture.
     $run = Hopper::define(PipelineCustomerImport::class)
-        ->from(CsvSource::make(__DIR__.'/../Fixtures/customers_messy.csv'))
+        ->from(CsvSource::make(__DIR__.'/../Fixtures/csv/customers_messy.csv'))
         ->stage();
 
     $run->preview();

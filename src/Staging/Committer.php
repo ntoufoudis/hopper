@@ -104,7 +104,7 @@ final class Committer
                         break;
                 }
 
-                $row->update(['committed_at' => now()]);
+                $row->update(['committed_at' => Date::now()]);
             }
 
             $run->increment('inserted', $inserted);

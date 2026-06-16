@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 use Ntoufoudis\Hopper\Hopper;
 use Ntoufoudis\Hopper\Sources\CsvSource;
-use Ntoufoudis\Hopper\Tests\Fixtures\Customer;
-use Ntoufoudis\Hopper\Tests\Fixtures\UpsertCustomerImport;
+use Ntoufoudis\Hopper\Tests\Fixtures\Imports\UpsertCustomerImport;
+use Ntoufoudis\Hopper\Tests\Fixtures\Models\Customer;
 
 it('preview counts exactly equal the subsequent commit results', function () {
     // Two existing rows => 2 updates; the other three => 3 inserts.
@@ -13,7 +13,7 @@ it('preview counts exactly equal the subsequent commit results', function () {
     Customer::create(['name' => 'Old Bob', 'email' => 'bob@example.com']);
 
     $run = Hopper::define(UpsertCustomerImport::class)
-        ->from(CsvSource::make(__DIR__.'/../Fixtures/customers.csv'))
+        ->from(CsvSource::make(__DIR__.'/../Fixtures/csv/customers.csv'))
         ->stage();
 
     $preview = $run->preview();

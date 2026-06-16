@@ -6,7 +6,7 @@ use Ntoufoudis\Hopper\Hopper;
 use Ntoufoudis\Hopper\Mapping\ColumnMap;
 use Ntoufoudis\Hopper\Models\StagingRow;
 use Ntoufoudis\Hopper\Sources\CsvSource;
-use Ntoufoudis\Hopper\Tests\Fixtures\CustomerImport;
+use Ntoufoudis\Hopper\Tests\Fixtures\Imports\CustomerImport;
 
 it('defaults fields() to the model fillable', function () {
     expect((new CustomerImport)->fields())->toBe(['name', 'email']);
@@ -14,7 +14,7 @@ it('defaults fields() to the model fillable', function () {
 
 it('stages rows under target field keys when an explicit map is applied', function () {
     $run = Hopper::define(CustomerImport::class)
-        ->from(CsvSource::make(__DIR__.'/../Fixtures/customers_aliased.csv'))
+        ->from(CsvSource::make(__DIR__.'/../Fixtures/csv/customers_aliased.csv'))
         ->map(new ColumnMap(['Full Name' => 'name', 'E-Mail Address' => 'email']))
         ->stage();
 
@@ -27,7 +27,7 @@ it('stages rows under target field keys when an explicit map is applied', functi
 
 it('stages raw header keys when no map is applied (M1 behaviour preserved)', function () {
     $run = Hopper::define(CustomerImport::class)
-        ->from(CsvSource::make(__DIR__.'/../Fixtures/customers.csv'))
+        ->from(CsvSource::make(__DIR__.'/../Fixtures/csv/customers.csv'))
         ->stage();
 
     $row = StagingRow::where('run_id', $run->id)->orderBy('source_row_number')->first();

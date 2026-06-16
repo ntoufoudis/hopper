@@ -5,8 +5,8 @@ declare(strict_types=1);
 use Ntoufoudis\Hopper\Enums\RunStatus;
 use Ntoufoudis\Hopper\Hopper;
 use Ntoufoudis\Hopper\Sources\ExcelSource;
-use Ntoufoudis\Hopper\Tests\Fixtures\Customer;
-use Ntoufoudis\Hopper\Tests\Fixtures\UpsertCustomerImport;
+use Ntoufoudis\Hopper\Tests\Fixtures\Imports\UpsertCustomerImport;
+use Ntoufoudis\Hopper\Tests\Fixtures\Models\Customer;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx as XlsxWriter;
 

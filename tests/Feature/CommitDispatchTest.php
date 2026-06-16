@@ -5,11 +5,11 @@ declare(strict_types=1);
 use Illuminate\Database\QueryException;
 use Ntoufoudis\Hopper\Hopper;
 use Ntoufoudis\Hopper\Sources\CsvSource;
-use Ntoufoudis\Hopper\Tests\Fixtures\BrokenImport;
+use Ntoufoudis\Hopper\Tests\Fixtures\Imports\BrokenImport;
 
 it('propagates a commit failure as a catchable exception on the sync queue', function () {
     $run = Hopper::define(BrokenImport::class)
-        ->from(CsvSource::make(__DIR__.'/../Fixtures/customers.csv'))
+        ->from(CsvSource::make(__DIR__.'/../Fixtures/csv/customers.csv'))
         ->stage();
 
     // A failing commit must surface as a normal, catchable exception - not a

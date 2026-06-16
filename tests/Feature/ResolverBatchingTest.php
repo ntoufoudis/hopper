@@ -10,8 +10,8 @@ use Ntoufoudis\Hopper\Models\StagingRow;
 use Ntoufoudis\Hopper\Sources\CsvSource;
 use Ntoufoudis\Hopper\Staging\Committer;
 use Ntoufoudis\Hopper\Staging\StagingWriter;
-use Ntoufoudis\Hopper\Tests\Fixtures\Customer;
-use Ntoufoudis\Hopper\Tests\Fixtures\UpsertCustomerImport;
+use Ntoufoudis\Hopper\Tests\Fixtures\Imports\UpsertCustomerImport;
+use Ntoufoudis\Hopper\Tests\Fixtures\Models\Customer;
 
 function makeUpsertRun(CsvSource $source): ImportRun
 {
@@ -24,7 +24,7 @@ function makeUpsertRun(CsvSource $source): ImportRun
 
 it('issues exactly one keyed lookup per chunk during staging', function () {
     // customers.csv has 5 rows; chunkSize 2 => 3 chunks => 3 prime queries.
-    $source = CsvSource::make(__DIR__.'/../Fixtures/customers.csv');
+    $source = CsvSource::make(__DIR__.'/../Fixtures/csv/customers.csv');
     $run = makeUpsertRun($source);
 
     $customerSelects = 0;
@@ -44,7 +44,7 @@ it('produces correct insert and update counts through stage and commit', functio
     // Pre-seed one matching customer so its row resolves to Update.
     Customer::create(['name' => 'Old Alice', 'email' => 'alice@example.com']);
 
-    $source = CsvSource::make(__DIR__.'/../Fixtures/customers.csv');
+    $source = CsvSource::make(__DIR__.'/../Fixtures/csv/customers.csv');
     $run = makeUpsertRun($source);
 
     app(StagingWriter::class)->write($run, $source, new UpsertCustomerImport);

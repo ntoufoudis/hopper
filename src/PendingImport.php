@@ -6,6 +6,7 @@ namespace Ntoufoudis\Hopper;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Bus;
+use LogicException;
 use Ntoufoudis\Hopper\Audit\ImportEvent;
 use Ntoufoudis\Hopper\Contracts\AuditDriver;
 use Ntoufoudis\Hopper\Contracts\Source;
@@ -17,7 +18,7 @@ use Ntoufoudis\Hopper\Models\ImportRun;
 
 final class PendingImport
 {
-    protected Source $source;
+    protected ?Source $source = null;
 
     protected ?ColumnMap $columnMap = null;
 
@@ -63,8 +64,12 @@ final class PendingImport
      */
     public function autoMap(): self
     {
+        if ($this->source === null) {
+            throw new LogicException('Call from() before autoMap().');
+        }
+
         $this->columnMap = $this->mapper->autoMap(
-            $this->signature(),
+            $this->signature($this->source),
             $this->definition::class,
             $this->source->headers(),
             $this->definition->fields(),
@@ -74,12 +79,14 @@ final class PendingImport
     }
 
     /**
-     * Structure-based signature over the source headers (independent of row
-     * content), so different data exports with the same column layout reuse
-     * the same mapping template.
+     * Create the run, emit run.created / mapping.resolved, and dispatch staging.
      */
     public function stage(): ImportRun
     {
+        if ($this->source === null) {
+            throw new LogicException('Call from() before stage().');
+        }
+
         $attributes = [
             'status' => RunStatus::Pending,
             'import_definition' => $this->definition::class,
@@ -119,8 +126,13 @@ final class PendingImport
         return $run->refresh();
     }
 
-    protected function signature(): string
+    /**
+     * Structure-based signature over the source headers (independent of row
+     * content), so different data exports with the same column layout reuse the
+     * same mapping template.
+     */
+    protected function signature(Source $source): string
     {
-        return hash('sha256', implode('|', $this->source->headers()));
+        return hash('sha256', implode('|', $source->headers()));
     }
 }

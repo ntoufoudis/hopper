@@ -6,12 +6,12 @@ use Ntoufoudis\Hopper\Enums\RunStatus;
 use Ntoufoudis\Hopper\Hopper;
 use Ntoufoudis\Hopper\Sources\CsvSource;
 use Ntoufoudis\Hopper\Staging\Committer;
-use Ntoufoudis\Hopper\Tests\Fixtures\CustomerImport;
-use Ntoufoudis\Hopper\Tests\Fixtures\ExplodingImport;
+use Ntoufoudis\Hopper\Tests\Fixtures\Imports\CustomerImport;
+use Ntoufoudis\Hopper\Tests\Fixtures\Imports\ExplodingImport;
 
 it('stamps started_at and completed_at on a successful commit', function () {
     $run = Hopper::define(CustomerImport::class)
-        ->from(CsvSource::make(__DIR__.'/../Fixtures/customers.csv'))
+        ->from(CsvSource::make(__DIR__.'/../Fixtures/csv/customers.csv'))
         ->stage();
 
     app(Committer::class)->commit($run);
@@ -24,7 +24,7 @@ it('stamps started_at and completed_at on a successful commit', function () {
 
 it('marks a run partially completed when a later chunk fails after earlier chunks committed', function () {
     $run = Hopper::define(ExplodingImport::class)
-        ->from(CsvSource::make(__DIR__.'/../Fixtures/customers_boom.csv'))
+        ->from(CsvSource::make(__DIR__.'/../Fixtures/csv/customers_boom.csv'))
         ->stage();
 
     expect(fn () => app(Committer::class)->commit($run))->toThrow(RuntimeException::class);

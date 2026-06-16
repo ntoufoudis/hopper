@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use Ntoufoudis\Hopper\Tests\Fixtures\CustomerImport;
+use Ntoufoudis\Hopper\Tests\Fixtures\Imports\CustomerImport;
 
 it('defaults rules() and pipes() to empty arrays', function () {
     $definition = new CustomerImport;

@@ -7,7 +7,7 @@ use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Support\Facades\Event;
 use Ntoufoudis\Hopper\Enums\ResolutionType;
 use Ntoufoudis\Hopper\Resolution\DatabaseResolver;
-use Ntoufoudis\Hopper\Tests\Fixtures\Customer;
+use Ntoufoudis\Hopper\Tests\Fixtures\Models\Customer;
 
 /** A minimal concrete resolver that overwrites the matched model with incoming. */
 function inlineResolver(): DatabaseResolver

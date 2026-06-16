@@ -5,15 +5,15 @@ declare(strict_types=1);
 use Ntoufoudis\Hopper\Hopper;
 use Ntoufoudis\Hopper\Models\AuditEvent;
 use Ntoufoudis\Hopper\Sources\CsvSource;
-use Ntoufoudis\Hopper\Tests\Fixtures\Customer;
-use Ntoufoudis\Hopper\Tests\Fixtures\CustomerImport;
+use Ntoufoudis\Hopper\Tests\Fixtures\Imports\CustomerImport;
+use Ntoufoudis\Hopper\Tests\Fixtures\Models\Customer;
 
 it('records the actor that initiated the run', function () {
     $actor = Customer::create(['name' => 'Admin', 'email' => 'admin@example.com']);
 
     $run = Hopper::define(CustomerImport::class)
         ->by($actor)
-        ->from(CsvSource::make(__DIR__.'/../Fixtures/customers.csv'))
+        ->from(CsvSource::make(__DIR__.'/../Fixtures/csv/customers.csv'))
         ->stage();
 
     $run->refresh();

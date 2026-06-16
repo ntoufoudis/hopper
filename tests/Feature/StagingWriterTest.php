@@ -8,7 +8,7 @@ use Ntoufoudis\Hopper\Models\ImportRun;
 use Ntoufoudis\Hopper\Models\StagingRow;
 use Ntoufoudis\Hopper\Sources\CsvSource;
 use Ntoufoudis\Hopper\Staging\StagingWriter;
-use Ntoufoudis\Hopper\Tests\Fixtures\CustomerImport;
+use Ntoufoudis\Hopper\Tests\Fixtures\Imports\CustomerImport;
 
 function makeRun(CsvSource $source): ImportRun
 {
@@ -20,7 +20,7 @@ function makeRun(CsvSource $source): ImportRun
 }
 
 it('stages every source row with an insert verdict and content hash', function () {
-    $source = CsvSource::make(__DIR__.'/../Fixtures/customers.csv');
+    $source = CsvSource::make(__DIR__.'/../Fixtures/csv/customers.csv');
     $run = makeRun($source);
 
     app(StagingWriter::class)->write($run, $source, new CustomerImport);
@@ -36,7 +36,7 @@ it('stages every source row with an insert verdict and content hash', function (
 });
 
 it('is idempotent on re-write of the same run (no duplicate staging rows)', function () {
-    $source = CsvSource::make(__DIR__.'/../Fixtures/customers.csv');
+    $source = CsvSource::make(__DIR__.'/../Fixtures/csv/customers.csv');
     $run = makeRun($source);
 
     app(StagingWriter::class)->write($run, $source, new CustomerImport);
@@ -46,7 +46,7 @@ it('is idempotent on re-write of the same run (no duplicate staging rows)', func
 });
 
 it('keeps staging rows isolated per run for the same source file', function () {
-    $source = CsvSource::make(__DIR__.'/../Fixtures/customers.csv');
+    $source = CsvSource::make(__DIR__.'/../Fixtures/csv/customers.csv');
     $runA = makeRun($source);
     $runB = makeRun($source);
 

@@ -6,11 +6,11 @@ use Ntoufoudis\Hopper\Hopper;
 use Ntoufoudis\Hopper\Models\FailedRow;
 use Ntoufoudis\Hopper\Models\StagingRow;
 use Ntoufoudis\Hopper\Sources\CsvSource;
-use Ntoufoudis\Hopper\Tests\Fixtures\PipelineCustomerImport;
+use Ntoufoudis\Hopper\Tests\Fixtures\Imports\PipelineCustomerImport;
 
 it('cascades a run delete to its staging and failed rows', function () {
     $run = Hopper::define(PipelineCustomerImport::class)
-        ->from(CsvSource::make(__DIR__.'/../Fixtures/customers_messy.csv'))
+        ->from(CsvSource::make(__DIR__.'/../Fixtures/csv/customers_messy.csv'))
         ->stage();
 
     expect(StagingRow::where('run_id', $run->id)->count())->toBeGreaterThan(0)

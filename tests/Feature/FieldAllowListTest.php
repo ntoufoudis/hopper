@@ -7,8 +7,8 @@ use Ntoufoudis\Hopper\Models\ImportRun;
 use Ntoufoudis\Hopper\Models\StagingRow;
 use Ntoufoudis\Hopper\Sources\CsvSource;
 use Ntoufoudis\Hopper\Staging\StagingWriter;
-use Ntoufoudis\Hopper\Tests\Fixtures\CustomerImport;
-use Ntoufoudis\Hopper\Tests\Fixtures\NoFieldsImport;
+use Ntoufoudis\Hopper\Tests\Fixtures\Imports\CustomerImport;
+use Ntoufoudis\Hopper\Tests\Fixtures\Imports\NoFieldsImport;
 
 function allowListRun(CsvSource $source): ImportRun
 {
@@ -20,7 +20,7 @@ function allowListRun(CsvSource $source): ImportRun
 }
 
 it('strips columns outside the import target fields when staging', function () {
-    $source = CsvSource::make(__DIR__.'/../Fixtures/customers_extra.csv');
+    $source = CsvSource::make(__DIR__.'/../Fixtures/csv/customers_extra.csv');
     $run = allowListRun($source);
 
     app(StagingWriter::class)->write($run, $source, new CustomerImport);
@@ -30,7 +30,7 @@ it('strips columns outside the import target fields when staging', function () {
 });
 
 it('refuses to stage when the import declares no target fields', function () {
-    $source = CsvSource::make(__DIR__.'/../Fixtures/customers.csv');
+    $source = CsvSource::make(__DIR__.'/../Fixtures/csv/customers.csv');
     $run = allowListRun($source);
 
     expect(fn () => app(StagingWriter::class)->write($run, $source, new NoFieldsImport))

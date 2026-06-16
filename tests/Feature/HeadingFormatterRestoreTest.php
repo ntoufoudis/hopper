@@ -8,7 +8,7 @@ use Ntoufoudis\Hopper\Sources\CsvSource;
 afterEach(fn () => HeadingRowFormatter::reset());
 
 it('restores the global heading-row formatter after reading headers', function () {
-    $source = CsvSource::make(__DIR__.'/../Fixtures/customers.csv');
+    $source = CsvSource::make(__DIR__.'/../Fixtures/csv/customers.csv');
 
     $source->headers();
 
@@ -17,7 +17,7 @@ it('restores the global heading-row formatter after reading headers', function (
 });
 
 it('restores the global heading-row formatter after streaming rows', function () {
-    $source = CsvSource::make(__DIR__.'/../Fixtures/customers.csv');
+    $source = CsvSource::make(__DIR__.'/../Fixtures/csv/customers.csv');
 
     iterator_to_array($source->rows());
 

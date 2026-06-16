@@ -5,7 +5,7 @@ declare(strict_types=1);
 use Illuminate\Database\Eloquent\Model;
 use Ntoufoudis\Hopper\Enums\ResolutionType;
 use Ntoufoudis\Hopper\Resolution\DatabaseResolver;
-use Ntoufoudis\Hopper\Tests\Fixtures\Customer;
+use Ntoufoudis\Hopper\Tests\Fixtures\Models\Customer;
 
 function foldResolver(): DatabaseResolver
 {

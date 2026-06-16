@@ -2,14 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Ntoufoudis\Hopper\Tests\Fixtures;
+namespace Ntoufoudis\Hopper\Tests\Fixtures\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-final class BrokenModel extends Model
+final class Customer extends Model
 {
-    protected $table = 'table_that_does_not_exist';
-
     protected $fillable = ['name', 'email'];
 
     public $timestamps = false;

@@ -5,7 +5,7 @@ declare(strict_types=1);
 use Ntoufoudis\Hopper\Sources\CsvSource;
 
 beforeEach(function () {
-    $this->csv = __DIR__.'/../Fixtures/customers.csv';
+    $this->csv = __DIR__.'/../Fixtures/csv/customers.csv';
 });
 
 it('reads headers in order', function () {

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use Ntoufoudis\Hopper\Enums\ResolutionType;
 use Ntoufoudis\Hopper\Resolution\MergeResolver;
-use Ntoufoudis\Hopper\Tests\Fixtures\Customer;
+use Ntoufoudis\Hopper\Tests\Fixtures\Models\Customer;
 
 it('merges incoming over existing but preserves existing where incoming is blank', function () {
     $existing = Customer::create(['name' => 'Original Name', 'email' => 'alice@example.com']);
