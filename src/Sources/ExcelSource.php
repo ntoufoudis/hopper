@@ -41,8 +41,12 @@ final class ExcelSource implements Source
         // Read header labels verbatim; mapping keys off the original spelling.
         HeadingRowFormatter::default('none');
 
-        // Null reader type => detect from the file extension (xlsx or xls).
-        $sheets = (new HeadingRowImport)->toArray($this->path);
+        try {
+            // Null reader type => detect from the file extension (xlsx or xls).
+            $sheets = (new HeadingRowImport)->toArray($this->path);
+        } finally {
+            HeadingRowFormatter::reset();
+        }
 
         $first = data_get($sheets, '0.0', []);
 
@@ -66,27 +70,31 @@ final class ExcelSource implements Source
         // Keep row keys identical to headers() so ColumnMap lookups line up.
         HeadingRowFormatter::default('none');
 
-        $fiber = new Fiber(function (): void {
-            ExcelFacade::import(
-                new RowStreamImport(
-                    static function (array $row): void {
-                        Fiber::suspend($row);
-                    },
-                    $this->chunkSize,
-                ),
-                $this->path,
-            );
-        });
+        try {
+            $fiber = new Fiber(function (): void {
+                ExcelFacade::import(
+                    new RowStreamImport(
+                        static function (array $row): void {
+                            Fiber::suspend($row);
+                        },
+                        $this->chunkSize,
+                    ),
+                    $this->path,
+                );
+            });
 
-        $row = $fiber->start();
-        $number = 1;
+            $row = $fiber->start();
+            $number = 1;
 
-        while (! $fiber->isTerminated()) {
-            if (is_array($row)) {
-                yield $number++ => $this->normaliseRow($row);
+            while (! $fiber->isTerminated()) {
+                if (is_array($row)) {
+                    yield $number++ => $this->normaliseRow($row);
+                }
+
+                $row = $fiber->resume();
             }
-
-            $row = $fiber->resume();
+        } finally {
+            HeadingRowFormatter::reset();
         }
     }
 
