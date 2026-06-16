@@ -8,6 +8,7 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Container\CircularDependencyException;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Config;
 use Ntoufoudis\Hopper\Enums\RunStatus;
 use Ntoufoudis\Hopper\Jobs\CommitChunk;
@@ -82,7 +83,11 @@ final class ImportRun extends Model
     {
         $this->update(['status' => RunStatus::Importing]);
 
-        CommitChunk::dispatch($this);
+        // Dispatch through the bus (not CommitChunk::dispatch) so the job never
+        // runs inside PendingDispatch::__destruct(): on the sync connection a
+        // rethrown commit failure must surface here, not as a fatal exception
+        // thrown from a destructor. Mirrors PendingImport::stage().
+        Bus::dispatch(new CommitChunk($this));
 
         return $this;
     }
