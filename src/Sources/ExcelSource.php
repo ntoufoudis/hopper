@@ -19,6 +19,8 @@ use Throwable;
  */
 final class ExcelSource implements Source
 {
+    protected ?string $fingerprint = null;
+
     protected function __construct(
         protected string $path,
         protected int $chunkSize = 500,
@@ -100,7 +102,7 @@ final class ExcelSource implements Source
 
     public function fingerprint(): string
     {
-        return hash('sha256', $this->path.':'.hash_file('sha256', $this->path));
+        return $this->fingerprint ??= hash('sha256', $this->path.':'.hash_file('sha256', $this->path));
     }
 
     /**

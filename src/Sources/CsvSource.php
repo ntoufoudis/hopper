@@ -13,8 +13,10 @@ use Maatwebsite\Excel\Imports\HeadingRowFormatter;
 use Ntoufoudis\Hopper\Contracts\Source;
 use Throwable;
 
-final readonly class CsvSource implements Source
+final class CsvSource implements Source
 {
+    protected ?string $fingerprint = null;
+
     private function __construct(
         protected string $path,
         protected int $chunkSize = 500,
@@ -97,7 +99,7 @@ final readonly class CsvSource implements Source
 
     public function fingerprint(): string
     {
-        return hash('sha256', $this->path.':'.hash_file('sha256', $this->path));
+        return $this->fingerprint ??= hash('sha256', $this->path.':'.hash_file('sha256', $this->path));
     }
 
     /**

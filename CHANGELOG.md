@@ -58,6 +58,10 @@ breaking changes between any two versions - see upgrade notes per version.
 - `ChronicleAuditDriver`: an opt-in audit driver that forwards each `ImportEvent` to Chronicle for tamper-evident, signed import history. It stays a soft dependency - selectable only when `laravel-chronicle/core` is installed, excluded from static analysis, and its install-path test skipped when the package is absent.
 - Actor attribution for runs: `Hopper::define()->by($actor)` records the initiating model on the run's `actor_type`/`actor_id` morph columns (now correctly fillable) and includes it in the `run.created` audit context. `ImportRun::actor()` exposes the `morphTo` relation. Runs initiated without `by()` remain anonymous as before.
 
+### Changed
+
+- `CsvSource` and `ExcelSource` memoize their content fingerprint, hashing the file at most once per instance. Previously `fingerprint()` re-ran `hash_file()` on every call - three times per `stage()` before the first row was processed - re-reading the whole upload each time.
+
 ### Fixed
 
 - Staging on the `sync` queue no longer throws `FiberError: Cannot switch fibers in current execution context` on PHP 8.3. `PendingImport::stage()` now dispatches `StageChunk` via the bus instead of `StageChunk::dispatch()`, so the job runs in the normal call stack rather than inside `PendingDispatch::__destruct()` - PHP < 8.4 forbids switching `CsvSource`'s Fiber from within a destructor. Queue behaviour is unchanged on real connections.
