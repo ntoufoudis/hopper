@@ -8,6 +8,7 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Container\CircularDependencyException;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Config;
@@ -34,7 +35,8 @@ use Ntoufoudis\Hopper\Staging\PreviewBuilder;
     'status',
     'import_definition',
     'source_fingerprint',
-    'actor',
+    'actor_type',
+    'actor_id',
     'total',
     'processed',
     'inserted',
@@ -93,5 +95,13 @@ final class ImportRun extends Model
         Bus::dispatch(new CommitChunk($this));
 
         return $this;
+    }
+
+    /**
+     * @return MorphTo<Model, $this>
+     */
+    public function actor(): MorphTo
+    {
+        return $this->morphTo();
     }
 }

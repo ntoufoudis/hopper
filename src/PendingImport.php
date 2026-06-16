@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ntoufoudis\Hopper;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Bus;
 use Ntoufoudis\Hopper\Audit\ImportEvent;
 use Ntoufoudis\Hopper\Contracts\AuditDriver;
@@ -20,6 +21,8 @@ final class PendingImport
 
     protected ?ColumnMap $columnMap = null;
 
+    protected ?Model $actor = null;
+
     public function __construct(
         protected ImportDefinition $definition,
         protected Mapper $mapper,
@@ -30,6 +33,16 @@ final class PendingImport
     public function from(Source $source): self
     {
         $this->source = $source;
+
+        return $this;
+    }
+
+    /**
+     * Attribute this run to an actor (recorded on the run and in the audit trail).
+     */
+    public function by(Model $actor): self
+    {
+        $this->actor = $actor;
 
         return $this;
     }
@@ -67,17 +80,28 @@ final class PendingImport
      */
     public function stage(): ImportRun
     {
-        $run = ImportRun::create([
+        $attributes = [
             'status' => RunStatus::Pending,
             'import_definition' => $this->definition::class,
             'source_fingerprint' => $this->source->fingerprint(),
-        ]);
+        ];
 
-        $audit = app(AuditDriver::class);
-        $audit->record(new ImportEvent('run.created', $run->id, [
+        $context = [
             'import_definition' => $this->definition::class,
             'source_fingerprint' => $this->source->fingerprint(),
-        ]));
+        ];
+
+        if ($this->actor !== null) {
+            $attributes['actor_type'] = $this->actor->getMorphClass();
+            $attributes['actor_id'] = $this->actor->getKey();
+            $context['actor_type'] = $this->actor->getMorphClass();
+            $context['actor_id'] = $this->actor->getKey();
+        }
+
+        $run = ImportRun::create($attributes);
+
+        $audit = app(AuditDriver::class);
+        $audit->record(new ImportEvent('run.created', $run->id, $context));
 
         if ($this->columnMap !== null) {
             $audit->record(new ImportEvent('mapping.resolved', $run->id, [
