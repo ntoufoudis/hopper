@@ -5,13 +5,18 @@ declare(strict_types=1);
 namespace Ntoufoudis\Hopper;
 
 use Illuminate\Console\Application as Artisan;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\ServiceProvider;
+use Ntoufoudis\Hopper\Audit\ChronicleAuditDriver;
+use Ntoufoudis\Hopper\Audit\DatabaseAuditDriver;
 use Ntoufoudis\Hopper\Console\MakeImportCommand;
+use Ntoufoudis\Hopper\Contracts\AuditDriver;
 use Ntoufoudis\Hopper\Mapping\Mapper;
 use Ntoufoudis\Hopper\Mapping\Strategies\AliasMatch;
 use Ntoufoudis\Hopper\Mapping\Strategies\ExactMatch;
 use Ntoufoudis\Hopper\Mapping\Strategies\FuzzyMatch;
+use RuntimeException;
 
 final class HopperServiceProvider extends ServiceProvider
 {
@@ -42,6 +47,17 @@ final class HopperServiceProvider extends ServiceProvider
                 new AliasMatch($aliases),
                 new FuzzyMatch(Config::float('hopper.mapping.fuzzy_threshold')),
             ]);
+        });
+
+        $this->app->singleton(AuditDriver::class, function (Application $app): AuditDriver {
+            return match (Config::string('hopper.audit.driver')) {
+                'chronicle' => class_exists('Chronicle\\Facades\\Chronicle')
+                    ? $app->make(ChronicleAuditDriver::class)
+                    : throw new RuntimeException(
+                        'hopper.audit.driver is "chronicle" but laravel-chronicle/core is not installed.'
+                    ),
+                default => $app->make(DatabaseAuditDriver::class),
+            };
         });
     }
 

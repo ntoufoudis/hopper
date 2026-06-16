@@ -7,13 +7,13 @@ namespace Ntoufoudis\Hopper\Mapping;
 use Ntoufoudis\Hopper\Contracts\MappingStrategy;
 use Ntoufoudis\Hopper\Models\MappingTemplate;
 
-final class Mapper
+final readonly class Mapper
 {
     /**
      * @param  list<MappingStrategy>  $strategies
      */
     public function __construct(
-        private array $strategies,
+        protected array $strategies,
     ) {
         //
     }
@@ -80,7 +80,12 @@ final class Mapper
 
         $map = $this->strategyMap($headers, $targetFields);
 
-        $this->saveTemplate($signature, $definition, $map);
+        // Only persist a usable template; saving an empty/no-match map would
+        // poison the (signature, definition) pair, short-circuiting every later
+        // import of this layout to the bad template before strategies re-run.
+        if ($map->toArray() !== []) {
+            $this->saveTemplate($signature, $definition, $map);
+        }
 
         return $map;
     }

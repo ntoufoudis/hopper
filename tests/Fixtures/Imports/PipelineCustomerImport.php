@@ -2,10 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Ntoufoudis\Hopper\Tests\Fixtures;
+namespace Ntoufoudis\Hopper\Tests\Fixtures\Imports;
 
 use Ntoufoudis\Hopper\Contracts\Pipe;
 use Ntoufoudis\Hopper\ImportDefinition;
+use Ntoufoudis\Hopper\Tests\Fixtures\Models\Customer;
 use Ntoufoudis\Hopper\Tests\Fixtures\Pipes\LowercaseEmail;
 use Ntoufoudis\Hopper\Tests\Fixtures\Pipes\RejectBlankName;
 
@@ -22,7 +23,7 @@ final class PipelineCustomerImport extends ImportDefinition
         return ['email' => 'required|email'];
     }
 
-    /** @return list<Pipe> */
+    /** @return Pipe */
     public function pipes(): array
     {
         // RejectBlankName runs first so a blank name is dropped during transform,

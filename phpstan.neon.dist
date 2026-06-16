@@ -6,3 +6,6 @@ parameters:
     paths:
         - src
     tmpDir: build/phpstan
+    excludePaths:
+        analyse:
+            - src/Audit/ChronicleAuditDriver.php

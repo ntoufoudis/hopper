@@ -7,22 +7,23 @@ use Ntoufoudis\Hopper\Models\ImportRun;
 use Ntoufoudis\Hopper\Models\StagingRow;
 use Ntoufoudis\Hopper\Sources\CsvSource;
 use Ntoufoudis\Hopper\Staging\Committer;
-use Ntoufoudis\Hopper\Tests\Fixtures\Customer;
-use Ntoufoudis\Hopper\Tests\Fixtures\CustomerImport;
+use Ntoufoudis\Hopper\Tests\Fixtures\Imports\CustomerImport;
+use Ntoufoudis\Hopper\Tests\Fixtures\Models\Customer;
 
 function stageCustomers(): ImportRun
 {
     return Hopper::define(CustomerImport::class)
-        ->from(CsvSource::make(__DIR__.'/../Fixtures/customers.csv'))
+        ->from(CsvSource::make(__DIR__.'/../Fixtures/csv/customers.csv'))
         ->stage();
 }
 
-it('does not duplicate staging rows when staged twice', function () {
-    stageCustomers();
-    expect(StagingRow::count())->toBe(5);
+it('keeps staging rows isolated per run when the same file is staged twice', function () {
+    $a = stageCustomers();
+    $b = stageCustomers();
 
-    stageCustomers();
-    expect(StagingRow::count())->toBe(5);
+    expect(StagingRow::count())->toBe(10)
+        ->and(StagingRow::where('run_id', $a->id)->count())->toBe(5)
+        ->and(StagingRow::where('run_id', $b->id)->count())->toBe(5);
 });
 
 it('resumes commit without double-inserting committed rows', function () {

@@ -12,13 +12,13 @@ use Ntoufoudis\Hopper\Mapping\MappingSuggestion;
  * spellings (e.g. email => ["e-mail", "email address"]). A field is only
  * suggested when it is among the import's target fields.
  */
-final class AliasMatch implements MappingStrategy
+final readonly class AliasMatch implements MappingStrategy
 {
     /**
      * @param  array<string, list<string>>  $aliases
      */
     public function __construct(
-        private array $aliases,
+        protected array $aliases,
     ) {
         //
     }

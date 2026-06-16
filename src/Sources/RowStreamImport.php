@@ -14,14 +14,14 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
  * Internal Laravel Excel import. Excel calls collection() once per chunk;
  * each row is emitted through the closure so a Fiber bridge can pull it.
  */
-final class RowStreamImport implements ToCollection, WithChunkReading, WithHeadingRow
+final readonly class RowStreamImport implements ToCollection, WithChunkReading, WithHeadingRow
 {
     /**
      * @param  Closure(array<string, scalar|null>): void  $emit
      */
     public function __construct(
-        private Closure $emit,
-        private int $chunkSize,
+        protected Closure $emit,
+        protected int $chunkSize,
     ) {
         //
     }

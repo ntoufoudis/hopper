@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Ntoufoudis\Hopper\Tests\Fixtures;
+namespace Ntoufoudis\Hopper\Tests\Fixtures\Models;
 
 use Illuminate\Database\Eloquent\Model;
 

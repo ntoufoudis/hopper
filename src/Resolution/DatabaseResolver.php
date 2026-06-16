@@ -21,6 +21,9 @@ abstract class DatabaseResolver implements Resolver
     /** @var array<string, Model> existing records keyed by match-field value */
     protected array $existing = [];
 
+    /** @var array<string, Model> existing records keyed by case-folded match value (unambiguous only) */
+    protected array $existingFolded = [];
+
     final public function __construct(
         protected readonly string $field,
     ) {
@@ -49,6 +52,7 @@ abstract class DatabaseResolver implements Resolver
     public function prime(array $rows): void
     {
         $this->existing = [];
+        $this->existingFolded = [];
 
         $modelClass = $this->modelClass;
 
@@ -72,11 +76,28 @@ abstract class DatabaseResolver implements Resolver
 
         $found = $modelClass::query()->whereIn($this->field, array_keys($values))->get();
 
+        $foldCounts = [];
+
         foreach ($found as $model) {
             $value = $model->getAttribute($this->field);
 
-            if (is_scalar($value)) {
-                $this->existing[(string) $value] = $model;
+            if (! is_scalar($value)) {
+                continue;
+            }
+
+            $key = (string) $value;
+            $this->existing[$key] = $model;
+
+            $folded = mb_strtolower($key);
+            $foldCounts[$folded] = ($foldCounts[$folded] ?? 0) + 1;
+            $this->existingFolded[$folded] = $model;
+        }
+
+        // Drop folded keys that collapse two distinct stored values, so
+        // case-sensitive data is never mis-matched by the fallback.
+        foreach ($foldCounts as $folded => $count) {
+            if ($count > 1) {
+                unset($this->existingFolded[$folded]);
             }
         }
     }
@@ -87,9 +108,15 @@ abstract class DatabaseResolver implements Resolver
     public function resolve(array $row): Resolution
     {
         $value = $row[$this->field] ?? null;
-        $match = (is_scalar($value) && isset($this->existing[(string) $value]))
-            ? $this->existing[(string) $value]
-            : null;
+
+        if (! is_scalar($value)) {
+            return new Resolution(ResolutionType::Insert);
+        }
+
+        $key = (string) $value;
+        $match = $this->existing[$key]
+            ?? $this->existingFolded[mb_strtolower($key)]
+            ?? null;
 
         if ($match === null) {
             return new Resolution(ResolutionType::Insert);

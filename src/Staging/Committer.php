@@ -4,27 +4,63 @@ declare(strict_types=1);
 
 namespace Ntoufoudis\Hopper\Staging;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Ntoufoudis\Hopper\Audit\ImportEvent;
+use Ntoufoudis\Hopper\Contracts\AuditDriver;
 use Ntoufoudis\Hopper\Enums\ResolutionType;
 use Ntoufoudis\Hopper\Enums\RunStatus;
 use Ntoufoudis\Hopper\ImportDefinition;
 use Ntoufoudis\Hopper\Models\ImportRun;
 use Ntoufoudis\Hopper\Models\StagingRow;
+use Throwable;
 
 final class Committer
 {
+    /**
+     * @throws Throwable
+     */
     public function commit(ImportRun $run): void
     {
         if ($run->status !== RunStatus::Importing) {
             $run->update(['status' => RunStatus::Importing]);
         }
 
-        while ($this->commitChunk($run) > 0) {
-            // Replay one chunk at a time until no uncommitted rows remain.
+        if ($run->started_at === null) {
+            $run->update(['started_at' => Date::now()]);
         }
 
-        $run->update(['status' => RunStatus::Completed]);
+        $audit = app(AuditDriver::class);
+        $audit->record(new ImportEvent('commit.started', $run->id));
+
+        try {
+            while ($this->commitChunk($run) > 0) {
+                // Replay one chunk at a time until no uncommitted rows remain.
+            }
+        } catch (Throwable $e) {
+            // Earlier chunks commit in their own transactions, so a later failure
+            // can leave the run partially imported.
+            $status = $run->processed > 0
+                ? RunStatus::PartiallyCompleted
+                : RunStatus::Failed;
+
+            $run->update(['status' => $status]);
+            $audit->record(new ImportEvent('commit.failed', $run->id, [
+                'error' => $e->getMessage(),
+            ]));
+
+            throw $e;
+        }
+
+        $run->update([
+            'status' => RunStatus::Completed,
+            'completed_at' => Date::now(),
+        ]);
+        $audit->record(new ImportEvent('commit.completed', $run->id, [
+            'inserted' => $run->inserted,
+            'updated' => $run->updated,
+            'skipped' => $run->skipped,
+        ]));
     }
 
     public function commitChunk(ImportRun $run): int
@@ -44,19 +80,15 @@ final class Committer
             return 0;
         }
 
-        DB::transaction(function () use ($rows, $modelClass, $run): void {
+        DB::transaction(function () use ($definition, $rows, $modelClass, $run): void {
             $inserted = 0;
             $updated = 0;
             $skipped = 0;
 
-            /** @var Model $prototype */
-            $prototype = new $modelClass;
-            $fillable = $prototype->getFillable();
+            $allowed = array_flip($definition->fields());
 
             foreach ($rows as $row) {
-                $attributes = $fillable === []
-                    ? $row->payload
-                    : array_intersect_key($row->payload, array_flip($fillable));
+                $attributes = array_intersect_key($row->payload, $allowed);
 
                 switch ($row->resolution) {
                     case ResolutionType::Insert:
@@ -72,7 +104,7 @@ final class Committer
                         break;
                 }
 
-                $row->update(['committed_at' => now()]);
+                $row->update(['committed_at' => Date::now()]);
             }
 
             $run->increment('inserted', $inserted);

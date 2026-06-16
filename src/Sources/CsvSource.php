@@ -15,9 +15,11 @@ use Throwable;
 
 final class CsvSource implements Source
 {
+    protected ?string $fingerprint = null;
+
     private function __construct(
-        private string $path,
-        private int $chunkSize = 500,
+        protected string $path,
+        protected int $chunkSize = 500,
     ) {
         //
     }
@@ -37,7 +39,11 @@ final class CsvSource implements Source
         // Read header labels verbatim; mapping keys off the original spelling.
         HeadingRowFormatter::default('none');
 
-        $sheets = (new HeadingRowImport)->toArray($this->path, null, Excel::CSV);
+        try {
+            $sheets = (new HeadingRowImport)->toArray($this->path, null, Excel::CSV);
+        } finally {
+            HeadingRowFormatter::reset();
+        }
 
         $first = data_get($sheets, '0.0', []);
 
@@ -61,35 +67,39 @@ final class CsvSource implements Source
         // Keep row keys identical to headers() so ColumnMap lookups line up.
         HeadingRowFormatter::default('none');
 
-        $fiber = new Fiber(function (): void {
-            ExcelFacade::import(
-                new RowStreamImport(
-                    static function (array $row): void {
-                        Fiber::suspend($row);
-                    },
-                    $this->chunkSize,
-                ),
-                $this->path,
-                null,
-                Excel::CSV,
-            );
-        });
+        try {
+            $fiber = new Fiber(function (): void {
+                ExcelFacade::import(
+                    new RowStreamImport(
+                        static function (array $row): void {
+                            Fiber::suspend($row);
+                        },
+                        $this->chunkSize,
+                    ),
+                    $this->path,
+                    null,
+                    Excel::CSV,
+                );
+            });
 
-        $row = $fiber->start();
-        $number = 1;
+            $row = $fiber->start();
+            $number = 1;
 
-        while (! $fiber->isTerminated()) {
-            if (is_array($row)) {
-                yield $number++ => $this->normaliseRow($row);
+            while (! $fiber->isTerminated()) {
+                if (is_array($row)) {
+                    yield $number++ => $this->normaliseRow($row);
+                }
+
+                $row = $fiber->resume();
             }
-
-            $row = $fiber->resume();
+        } finally {
+            HeadingRowFormatter::reset();
         }
     }
 
     public function fingerprint(): string
     {
-        return hash('sha256', $this->path.':'.hash_file('sha256', $this->path));
+        return $this->fingerprint ??= hash('sha256', $this->path.':'.hash_file('sha256', $this->path));
     }
 
     /**

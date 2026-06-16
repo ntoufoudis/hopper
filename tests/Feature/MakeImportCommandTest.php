@@ -35,13 +35,13 @@ it('generates a definition that stages successfully', function () {
     $path = app_path('Hopper/GeneratedCustomerImport.php');
     File::put($path, str_replace(
         '\\App\\Models\\Model::class',
-        '\\Ntoufoudis\\Hopper\\Tests\\Fixtures\\Customer::class',
+        '\\Ntoufoudis\\Hopper\\Tests\\Fixtures\\Models\\Customer::class',
         File::get($path),
     ));
     require $path;
 
     $run = Hopper::define(GeneratedCustomerImport::class)
-        ->from(CsvSource::make(__DIR__.'/../Fixtures/customers.csv'))
+        ->from(CsvSource::make(__DIR__.'/../Fixtures/csv/customers.csv'))
         ->stage();
 
     expect($run->status)->toBe(RunStatus::Ready)

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Ntoufoudis\Hopper;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Config;
 use Ntoufoudis\Hopper\Contracts\Pipe;
 use Ntoufoudis\Hopper\Contracts\Resolver;
 use Ntoufoudis\Hopper\Resolution\InsertOnlyResolver;
@@ -54,6 +55,6 @@ abstract class ImportDefinition
 
     public function chunkSize(): int
     {
-        return 500;
+        return Config::integer('hopper.default_chunk_size');
     }
 }

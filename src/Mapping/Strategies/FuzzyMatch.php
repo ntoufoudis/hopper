@@ -9,13 +9,13 @@ use Ntoufoudis\Hopper\Mapping\MappingSuggestion;
 
 /**
  * Lowest-priority strategy: normalises header and field (lowercase, strip all
- * non-alphanumerics) and scores similarity as 1 - levenshtein/masLength. The
+ * non-alphanumerics) and scores similarity as 1 - levenshtein/maxLength. The
  * best-scoring field at or above the configured threshold wins.
  */
-final class FuzzyMatch implements MappingStrategy
+final readonly class FuzzyMatch implements MappingStrategy
 {
     public function __construct(
-        private float $threshold = 0.8,
+        protected float $threshold = 0.8,
     ) {
         //
     }

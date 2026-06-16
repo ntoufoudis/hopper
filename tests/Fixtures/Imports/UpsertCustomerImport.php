@@ -2,11 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Ntoufoudis\Hopper\Tests\Fixtures;
+namespace Ntoufoudis\Hopper\Tests\Fixtures\Imports;
 
 use Ntoufoudis\Hopper\Contracts\Resolver;
 use Ntoufoudis\Hopper\ImportDefinition;
 use Ntoufoudis\Hopper\Resolution\UpsertResolver;
+use Ntoufoudis\Hopper\Tests\Fixtures\Models\Customer;
 
 final class UpsertCustomerImport extends ImportDefinition
 {

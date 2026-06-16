@@ -15,13 +15,13 @@ use Traversable;
  *
  * @implements IteratorAggregate<string, string>
  */
-final class ColumnMap implements IteratorAggregate
+final readonly class ColumnMap implements IteratorAggregate
 {
     /**
      * @param  array<string, string>  $map
      */
     public function __construct(
-        private array $map,
+        protected array $map,
     ) {
         //
     }

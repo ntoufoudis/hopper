@@ -7,6 +7,9 @@ namespace Ntoufoudis\Hopper\Staging;
 use Illuminate\Contracts\Validation\Factory as ValidationFactory;
 use Illuminate\Support\Facades\Date;
 use JsonException;
+use LogicException;
+use Ntoufoudis\Hopper\Audit\ImportEvent;
+use Ntoufoudis\Hopper\Contracts\AuditDriver;
 use Ntoufoudis\Hopper\Contracts\Resolver;
 use Ntoufoudis\Hopper\Contracts\Source;
 use Ntoufoudis\Hopper\Exceptions\RowRejected;
@@ -48,8 +51,15 @@ final class StagingWriter
             $resolver->useModel($modelClass);
         }
 
-        /** @var list<string> $fillable */
-        $fillable = array_values((new $modelClass)->getFillable());
+        $fields = $definition->fields();
+
+        if ($fields === []) {
+            throw new LogicException(sprintf(
+                'Import [%s] resolved no target fields. Declare $fillable on [%s] or override fields().',
+                $definition::class,
+                $modelClass,
+            ));
+        }
 
         /** @var list<array{number: int, row: array<string, mixed>}> $chunk */
         $chunk = [];
@@ -78,13 +88,13 @@ final class StagingWriter
             $chunk[] = ['number' => $rowNumber, 'row' => $row];
 
             if (count($chunk) >= $chunkSize) {
-                $this->stageChunk($run, $resolver, $fillable, $fingerprint, $chunk);
+                $this->stageChunk($run, $resolver, $fields, $fingerprint, $chunk);
                 $chunk = [];
             }
         }
 
         if ($chunk !== []) {
-            $this->stageChunk($run, $resolver, $fillable, $fingerprint, $chunk);
+            $this->stageChunk($run, $resolver, $fields, $fingerprint, $chunk);
         }
 
         $run->update([
@@ -98,7 +108,7 @@ final class StagingWriter
      * with the whole chunk first (one keyed lookup), then each row's verdict is
      * upserted into staging keyed on its unique row_hash.
      *
-     * @param  list<string>  $fillable
+     * @param  list<string>  $fields
      * @param  list<array{number: int, row: array<string, mixed>}>  $chunk
      *
      * @throws JsonException
@@ -106,7 +116,7 @@ final class StagingWriter
     protected function stageChunk(
         ImportRun $run,
         Resolver $resolver,
-        array $fillable,
+        array $fields,
         string $fingerprint,
         array $chunk,
     ): void {
@@ -120,19 +130,16 @@ final class StagingWriter
         foreach ($chunk as $item) {
             $resolution = $resolver->resolve($item['row']);
 
-            if ($resolution->model !== null) {
-                $attributes = $resolution->model->getAttributes();
-                $payload = $fillable === []
-                    ? $attributes
-                    : array_intersect_key($attributes, array_flip($fillable));
-            } else {
-                $payload = $item['row'];
-            }
+            $allowed = array_flip($fields);
+
+            $payload = $resolution->model !== null
+                ? array_intersect_key($resolution->model->getAttributes(), $allowed)
+                : array_intersect_key($item['row'], $allowed);
 
             $records[] = [
                 'run_id' => $run->id,
                 'source_row_number' => $item['number'],
-                'row_hash' => hash('sha256', $fingerprint.':'.$item['number']),
+                'row_hash' => hash('sha256', $run->id.':'.$fingerprint.':'.$item['number']),
                 'payload' => json_encode($payload, JSON_THROW_ON_ERROR),
                 'resolution' => $resolution->type->value,
                 'resolved_key' => $resolution->model?->getKey(),
@@ -189,7 +196,7 @@ final class StagingWriter
             [[
                 'run_id' => $run->id,
                 'source_row_number' => $rowNumber,
-                'row_hash' => hash('sha256', $fingerprint.':'.$rowNumber),
+                'row_hash' => hash('sha256', $run->id.':'.$fingerprint.':'.$rowNumber),
                 'payload' => json_encode($row, JSON_THROW_ON_ERROR),
                 'reason' => $reason,
                 'created_at' => $now,
@@ -198,6 +205,11 @@ final class StagingWriter
             ['row_hash'],
             ['run_id', 'source_row_number', 'payload', 'reason', 'updated_at'],
         );
+
+        app(AuditDriver::class)->record(new ImportEvent('row.rejected', $run->id, [
+            'source_row_number' => $rowNumber,
+            'reason' => $reason,
+        ]));
     }
 
     /**

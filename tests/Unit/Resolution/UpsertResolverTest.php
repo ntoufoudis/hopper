@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use Ntoufoudis\Hopper\Enums\ResolutionType;
 use Ntoufoudis\Hopper\Resolution\UpsertResolver;
-use Ntoufoudis\Hopper\Tests\Fixtures\Customer;
+use Ntoufoudis\Hopper\Tests\Fixtures\Models\Customer;
 
 it('resolves a new key to Insert', function () {
     $resolver = UpsertResolver::by('email');
