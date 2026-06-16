@@ -17,12 +17,13 @@ function stageCustomers(): ImportRun
         ->stage();
 }
 
-it('does not duplicate staging rows when staged twice', function () {
-    stageCustomers();
-    expect(StagingRow::count())->toBe(5);
+it('keeps staging rows isolated per run when the same file is staged twice', function () {
+    $a = stageCustomers();
+    $b = stageCustomers();
 
-    stageCustomers();
-    expect(StagingRow::count())->toBe(5);
+    expect(StagingRow::count())->toBe(10)
+        ->and(StagingRow::where('run_id', $a->id)->count())->toBe(5)
+        ->and(StagingRow::where('run_id', $b->id)->count())->toBe(5);
 });
 
 it('resumes commit without double-inserting committed rows', function () {

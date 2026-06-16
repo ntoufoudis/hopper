@@ -134,7 +134,7 @@ final class StagingWriter
             $records[] = [
                 'run_id' => $run->id,
                 'source_row_number' => $item['number'],
-                'row_hash' => hash('sha256', $fingerprint.':'.$item['number']),
+                'row_hash' => hash('sha256', $run->id.':'.$fingerprint.':'.$item['number']),
                 'payload' => json_encode($payload, JSON_THROW_ON_ERROR),
                 'resolution' => $resolution->type->value,
                 'resolved_key' => $resolution->model?->getKey(),
@@ -191,7 +191,7 @@ final class StagingWriter
             [[
                 'run_id' => $run->id,
                 'source_row_number' => $rowNumber,
-                'row_hash' => hash('sha256', $fingerprint.':'.$rowNumber),
+                'row_hash' => hash('sha256', $run->id.':'.$fingerprint.':'.$rowNumber),
                 'payload' => json_encode($row, JSON_THROW_ON_ERROR),
                 'reason' => $reason,
                 'created_at' => $now,

@@ -60,11 +60,12 @@ it('records the rejection reason from the pipe and the validator', function () {
         ->and($badEmail->reason)->toContain('email');
 });
 
-it('is idempotent on re-write for both staged and failed rows', function () {
+it('is idempotent on re-write of the same run for both staged and failed rows', function () {
     $source = CsvSource::make(__DIR__.'/../Fixtures/customers_messy.csv');
+    $run = makePipelineRun($source);
 
-    app(StagingWriter::class)->write(makePipelineRun($source), $source, new PipelineCustomerImport);
-    app(StagingWriter::class)->write(makePipelineRun($source), $source, new PipelineCustomerImport);
+    app(StagingWriter::class)->write($run, $source, new PipelineCustomerImport);
+    app(StagingWriter::class)->write($run, $source, new PipelineCustomerImport);
 
     expect(StagingRow::count())->toBe(2)
         ->and(FailedRow::count())->toBe(2);
