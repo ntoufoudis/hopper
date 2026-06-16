@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Ntoufoudis\Hopper\Staging;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Ntoufoudis\Hopper\Audit\ImportEvent;
 use Ntoufoudis\Hopper\Contracts\AuditDriver;
@@ -67,19 +66,15 @@ final class Committer
             return 0;
         }
 
-        DB::transaction(function () use ($rows, $modelClass, $run): void {
+        DB::transaction(function () use ($definition, $rows, $modelClass, $run): void {
             $inserted = 0;
             $updated = 0;
             $skipped = 0;
 
-            /** @var Model $prototype */
-            $prototype = new $modelClass;
-            $fillable = $prototype->getFillable();
+            $allowed = array_flip($definition->fields());
 
             foreach ($rows as $row) {
-                $attributes = $fillable === []
-                    ? $row->payload
-                    : array_intersect_key($row->payload, array_flip($fillable));
+                $attributes = array_intersect_key($row->payload, $allowed);
 
                 switch ($row->resolution) {
                     case ResolutionType::Insert:
