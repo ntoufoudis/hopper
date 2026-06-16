@@ -58,6 +58,7 @@ breaking changes between any two versions - see upgrade notes per version.
 - `ChronicleAuditDriver`: an opt-in audit driver that forwards each `ImportEvent` to Chronicle for tamper-evident, signed import history. It stays a soft dependency - selectable only when `laravel-chronicle/core` is installed, excluded from static analysis, and its install-path test skipped when the package is absent.
 - Actor attribution for runs: `Hopper::define()->by($actor)` records the initiating model on the run's `actor_type`/`actor_id` morph columns (now correctly fillable) and includes it in the `run.created` audit context. `ImportRun::actor()` exposes the `morphTo` relation. Runs initiated without `by()` remain anonymous as before.
 - MIT `LICENSE` file at the project root.
+- Project `README.md` covering installation, the stage -> preview -> commit workflow, mapping & resolvers, validation/pipes, failed-row export, audit, and configuration.
 
 ### Changed
 
