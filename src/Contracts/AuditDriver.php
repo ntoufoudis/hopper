@@ -8,8 +8,7 @@ use Ntoufoudis\Hopper\Audit\ImportEvent;
 
 /**
  * Sink for import lifecycle events. The default DatabaseAuditDriver writes to
- * hopper_audit; ChronicleAuditDriver forwards to Chronicle as a soft-dependency
- * opt-in.
+ * hopper_audit.
  */
 interface AuditDriver
 {

@@ -74,3 +74,7 @@ breaking changes between any two versions - see upgrade notes per version.
 - `hopper_staging`, `hopper_failed_rows`, and `hopper_audit` now declare a real foreign key on `run_id` referencing `hopper_runs` - staging/failed rows cascade-delete with their run, and audit rows null their `run_id` on delete. Previously `run_id` was an unconstrained column, leaving child rows orphaned when a run was removed.
 - `DatabaseResolver` matching is now safe under case-insensitive database collations. Lookups still try the exact stored value first, then fall back to a case-folded index built only from unambiguous values. Previously, a case-insensitive `whereIn` could load a differently-cased record that the byte-exact in-memory lookup then missed, producing a duplicate insert instead of an update; case-sensitive data is unaffected because ambiguous folded keys are excluded from the fallback.
 - Polish: `ImportDefinition::chunkSize()` now reads the previously-unused `hopper.default_chunk_size` config value; `PendingImport::stage()`/`autoMap()` throw a clear `LogicException` when called before `from()` instead of an opaque uninitialised-property error; `Committer` uses `Date::now()` consistently for `committed_at`; and the misplaced `stage()` docblock and a `FuzzyMatch` comment typo are corrected.
+
+### Removed
+
+- The unshippable Chronicle audit driver - and its provider branch, config/`suggest` references, and skipped test - is cut from 1.0; it is now tracked as planned/experimental in the README roadmap.

@@ -27,9 +27,6 @@
     "larastan/larastan": "^3.0",
     "laravel/pint": "^1.18"
   },
-  "suggest": {
-    "laravel-chronicle/core": "Enables ChronicleAuditDriver for tamper-evident, signed import history."
-  },
   "autoload": {
     "psr-4": {
       "Ntoufoudis\\Hopper\\": "src/"
