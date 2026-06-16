@@ -8,6 +8,7 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Container\CircularDependencyException;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Config;
 use Ntoufoudis\Hopper\Enums\RunStatus;
@@ -26,6 +27,8 @@ use Ntoufoudis\Hopper\Staging\PreviewBuilder;
  * @property int $updated
  * @property int $skipped
  * @property int $failed
+ * @property ?Carbon $started_at
+ * @property ?Carbon $completed_at
  */
 #[Fillable([
     'status',

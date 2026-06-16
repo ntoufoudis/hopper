@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ntoufoudis\Hopper\Staging;
 
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Ntoufoudis\Hopper\Audit\ImportEvent;
 use Ntoufoudis\Hopper\Contracts\AuditDriver;
@@ -25,6 +26,10 @@ final class Committer
             $run->update(['status' => RunStatus::Importing]);
         }
 
+        if ($run->started_at === null) {
+            $run->update(['started_at' => Date::now()]);
+        }
+
         $audit = app(AuditDriver::class);
         $audit->record(new ImportEvent('commit.started', $run->id));
 
@@ -33,7 +38,13 @@ final class Committer
                 // Replay one chunk at a time until no uncommitted rows remain.
             }
         } catch (Throwable $e) {
-            $run->update(['status' => RunStatus::Failed]);
+            // Earlier chunks commit in their own transactions, so a later failure
+            // can leave the run partially imported.
+            $status = $run->processed > 0
+                ? RunStatus::PartiallyCompleted
+                : RunStatus::Failed;
+
+            $run->update(['status' => $status]);
             $audit->record(new ImportEvent('commit.failed', $run->id, [
                 'error' => $e->getMessage(),
             ]));
@@ -41,7 +52,10 @@ final class Committer
             throw $e;
         }
 
-        $run->update(['status' => RunStatus::Completed]);
+        $run->update([
+            'status' => RunStatus::Completed,
+            'completed_at' => Date::now(),
+        ]);
         $audit->record(new ImportEvent('commit.completed', $run->id, [
             'inserted' => $run->inserted,
             'updated' => $run->updated,
