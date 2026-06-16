@@ -61,6 +61,7 @@ breaking changes between any two versions - see upgrade notes per version.
 ### Changed
 
 - `CsvSource` and `ExcelSource` memoize their content fingerprint, hashing the file at most once per instance. Previously `fingerprint()` re-ran `hash_file()` on every call - three times per `stage()` before the first row was processed - re-reading the whole upload each time.
+- Constrained `maatwebsite/excel` from `*` to `^3.1||^4`.
 
 ### Fixed
 
