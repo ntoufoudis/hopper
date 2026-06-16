@@ -18,7 +18,7 @@
     "illuminate/database": "^13.0",
     "illuminate/bus": "^13.0",
     "illuminate/queue": "^13.0",
-    "maatwebsite/excel": "*"
+    "maatwebsite/excel": "^3.1||^4"
   },
   "require-dev": {
     "orchestra/testbench": "^11.0",
@@ -26,9 +26,6 @@
     "pestphp/pest-plugin-laravel": "^4.0",
     "larastan/larastan": "^3.0",
     "laravel/pint": "^1.18"
-  },
-  "suggest": {
-    "laravel-chronicle/core": "Enables ChronicleAuditDriver for tamper-evident, signed import history."
   },
   "autoload": {
     "psr-4": {

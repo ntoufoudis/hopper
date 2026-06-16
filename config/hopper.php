@@ -26,8 +26,7 @@ return [
     |--------------------------------------------------------------------------
     | Audit
     |--------------------------------------------------------------------------
-    | Audit driver sink. "database" is the default; "chronicle" requires
-    | laravel-chronicle/core to be installed.
+    | Audit driver sink. "database" records each import event to hopper_audit.
     */
     'audit' => [
         'driver' => env('HOPPER_AUDIT_DRIVER', 'database'),

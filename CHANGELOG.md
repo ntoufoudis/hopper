@@ -10,6 +10,10 @@ breaking changes between any two versions - see upgrade notes per version.
 
 ## [Unreleased]
 
+## [1.0.0] - TBD
+
+Hopper 1.0: a headless import engine for Laravel - mapping persistence, exact pre-commit preview, idempotent re-runnable staging/commit for CSV and XLSX sources, pluggable resolvers, validation + transformation pipes, failed-row export, and a governed audit seam.
+
 ### Added
 
 - Package manifest `composer.json` for `ntoufoudis/hopper` (MIT): PHP `^8.3`, Laravel `^13` dependencies, `maatwebsite/excel`, dev tooling (Testbench, Pest, Larastan, Pint), PSR-4 autoloading, and Laravel package auto-discovery.
@@ -57,10 +61,13 @@ breaking changes between any two versions - see upgrade notes per version.
 - Lifecycle audit emission wired through the engine: `run.created` and `mapping.resolved` (`PendingImport`), `row.rejected` (`StagingWriter`), `preview.generated` (`PreviewBuilder`), and `commit.started` / `commit.completed` / `commit.failed` (`Committer`, with the run marked `Failed` and the error captured on a thrown commit) - each recorded through the configured `AuditDriver`.
 - `ChronicleAuditDriver`: an opt-in audit driver that forwards each `ImportEvent` to Chronicle for tamper-evident, signed import history. It stays a soft dependency - selectable only when `laravel-chronicle/core` is installed, excluded from static analysis, and its install-path test skipped when the package is absent.
 - Actor attribution for runs: `Hopper::define()->by($actor)` records the initiating model on the run's `actor_type`/`actor_id` morph columns (now correctly fillable) and includes it in the `run.created` audit context. `ImportRun::actor()` exposes the `morphTo` relation. Runs initiated without `by()` remain anonymous as before.
+- MIT `LICENSE` file at the project root.
+- Project `README.md` covering installation, the stage -> preview -> commit workflow, mapping & resolvers, validation/pipes, failed-row export, audit, and configuration.
 
 ### Changed
 
 - `CsvSource` and `ExcelSource` memoize their content fingerprint, hashing the file at most once per instance. Previously `fingerprint()` re-ran `hash_file()` on every call - three times per `stage()` before the first row was processed - re-reading the whole upload each time.
+- Constrained `maatwebsite/excel` from `*` to `^3.1||^4`.
 
 ### Fixed
 
@@ -74,3 +81,7 @@ breaking changes between any two versions - see upgrade notes per version.
 - `hopper_staging`, `hopper_failed_rows`, and `hopper_audit` now declare a real foreign key on `run_id` referencing `hopper_runs` - staging/failed rows cascade-delete with their run, and audit rows null their `run_id` on delete. Previously `run_id` was an unconstrained column, leaving child rows orphaned when a run was removed.
 - `DatabaseResolver` matching is now safe under case-insensitive database collations. Lookups still try the exact stored value first, then fall back to a case-folded index built only from unambiguous values. Previously, a case-insensitive `whereIn` could load a differently-cased record that the byte-exact in-memory lookup then missed, producing a duplicate insert instead of an update; case-sensitive data is unaffected because ambiguous folded keys are excluded from the fallback.
 - Polish: `ImportDefinition::chunkSize()` now reads the previously-unused `hopper.default_chunk_size` config value; `PendingImport::stage()`/`autoMap()` throw a clear `LogicException` when called before `from()` instead of an opaque uninitialised-property error; `Committer` uses `Date::now()` consistently for `committed_at`; and the misplaced `stage()` docblock and a `FuzzyMatch` comment typo are corrected.
+
+### Removed
+
+- The unshippable Chronicle audit driver - and its provider branch, config/`suggest` references, and skipped test - is cut from 1.0; it is now tracked as planned/experimental in the README roadmap.
