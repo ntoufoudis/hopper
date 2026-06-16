@@ -12,7 +12,10 @@ return new class extends Migration
     {
         Schema::create(config('hopper.tables.audit'), function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('run_id')->nullable()->index();
+            $table->foreignId('run_id')
+                ->nullable()
+                ->constrained(config('hopper.tables.runs'))
+                ->nullOnDelete();
             $table->string('event');
             $table->json('context');
             $table->timestamp('occurred_at');

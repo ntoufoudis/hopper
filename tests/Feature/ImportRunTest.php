@@ -31,8 +31,14 @@ it('returns zero percentage when total is null', function () {
 });
 
 it('casts staging payload to array and resolution to enum', function () {
+    $parent = ImportRun::create([
+        'status' => RunStatus::Ready,
+        'import_definition' => 'X',
+        'source_fingerprint' => 'fp',
+    ]);
+
     $row = StagingRow::create([
-        'run_id' => 1,
+        'run_id' => $parent->id,
         'source_row_number' => 1,
         'row_hash' => 'h1',
         'payload' => ['email' => 'a@b.test'],

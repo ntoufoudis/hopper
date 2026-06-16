@@ -12,7 +12,7 @@ return new class extends Migration
     {
         Schema::create(config('hopper.tables.staging'), function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('run_id');
+            $table->foreignId('run_id')->constrained(config('hopper.tables.runs'))->cascadeOnDelete();
             $table->unsignedInteger('source_row_number');
             $table->string('row_hash')->unique();
             $table->json('payload');
