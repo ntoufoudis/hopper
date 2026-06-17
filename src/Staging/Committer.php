@@ -97,8 +97,11 @@ final class Committer
                         $inserted++;
                         break;
                     case ResolutionType::Update:
-                        $modelClass::query()->whereKey($row->resolved_key)->update($attributes);
-                        $updated++;
+                        $model = $modelClass::query()->whereKey($row->resolved_key)->first();
+                        if ($model !== null) {
+                            $model->fill($attributes)->save();
+                            $updated++;
+                        }
                         break;
                     case ResolutionType::Skip:
                         $skipped++;
