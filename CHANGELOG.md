@@ -10,7 +10,7 @@ breaking changes between any two versions - see upgrade notes per version.
 
 ## [Unreleased]
 
-## [1.0.0] - TBD
+## [1.0.0] - 2026-06-17
 
 Hopper 1.0: a headless import engine for Laravel - mapping persistence, exact pre-commit preview, idempotent re-runnable staging/commit for CSV and XLSX sources, pluggable resolvers, validation + transformation pipes, failed-row export, and a governed audit seam.
 

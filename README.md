@@ -24,7 +24,7 @@ Parsing is delegated to [Laravel Excel](https://laravel-excel.com)
 ## Requirements
 
 - PHP `^8.2`
-- Laravel `^12`
+- Laravel `^12` or `^13`
 
 ## Installation
 
