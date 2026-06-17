@@ -71,6 +71,7 @@ Hopper 1.0: a headless import engine for Laravel - mapping persistence, exact pr
 - Commit now routes updates through the model lifecycle: a resolved Update fetches the record and `fill()->save()`s it, so updates fire model events/observers and apply casts/mutators consistently with inserts (previously `query()->update()` bypassed them). Costs one read per updated row.
 - Recorded dependency-range decisions: Laravel «^12||^13», PHP «^8.2», and `minimum-stability: «stable»`. The CI matrix now matches the declared range.
 - Updated `README.md`
+- Reconciled the meaning of `total` to **staged-only** across the API: `ImportPreview.total` now equals `valid` (the rows that will be committed) instead of `valid + errors`, matching `ImportRun.total` and `progress()`. Failed rows are reported separately in `errors`/`failed`. `preview()` and `progress()` now agree.
 
 ### Fixed
 
