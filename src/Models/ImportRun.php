@@ -86,7 +86,19 @@ final class ImportRun extends Model
 
     public function commit(): self
     {
-        $this->update(['status' => RunStatus::Importing]);
+        // Atomically claim the run for committing. Only a run in a commitable state
+        // (Ready, or resumable PartiallyCompleted) may transition to Importing; a
+        // duplicate or concurrent commit() sees 0 rows affected and refuses re-entry.
+        $claimed = ImportRun::query()
+            ->whereKey($this->getKey())
+            ->whereIn('status', [RunStatus::Ready, RunStatus::PartiallyCompleted])
+            ->update(['status' => RunStatus::Importing]);
+
+        if ($claimed === 0) {
+            return $this;
+        }
+
+        $this->setAttribute('status', RunStatus::Importing);
 
         // Dispatch through the bus (not CommitChunk::dispatch) so the job never
         // runs inside PendingDispatch::__destruct(): on the sync connection a
