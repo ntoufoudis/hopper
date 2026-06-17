@@ -87,6 +87,7 @@ Hopper 1.0: a headless import engine for Laravel - mapping persistence, exact pr
 - `DatabaseResolver` matching is now safe under case-insensitive database collations. Lookups still try the exact stored value first, then fall back to a case-folded index built only from unambiguous values. Previously, a case-insensitive `whereIn` could load a differently-cased record that the byte-exact in-memory lookup then missed, producing a duplicate insert instead of an update; case-sensitive data is unaffected because ambiguous folded keys are excluded from the fallback.
 - Polish: `ImportDefinition::chunkSize()` now reads the previously-unused `hopper.default_chunk_size` config value; `PendingImport::stage()`/`autoMap()` throw a clear `LogicException` when called before `from()` instead of an opaque uninitialised-property error; `Committer` uses `Date::now()` consistently for `committed_at`; and the misplaced `stage()` docblock and a `FuzzyMatch` comment typo are corrected.
 - Commit is now safe under duplicate/concurrent dispatch: `ImportRun::commit()` atomically claims a commitable run (refusing re-entry when it is already importing or completed), and `Committer::commitChunk()` selects uncommitted staging rows with `lockForUpdate()` inside the write transaction. A double dispatch or retry-while-running can no longer double-insert.
+- `FailedRowExporter` now passes the `$escape` argument explicitly to `fputcsv()` (`escape: ''`), silencing the PHP 8.4 deprecation and keeping CSV output stable across PHP 8.3/8.4/8.5.
 
 ### Removed
 

@@ -41,7 +41,7 @@ final class FailedRowExporter
 
         $header = array_map(fn (string $column): string => $this->guard($column), $columns);
         $header[] = 'error';
-        fputcsv($handle, $header);
+        fputcsv($handle, $header, escape: '');
 
         foreach ($rows as $row) {
             $line = [];
@@ -52,7 +52,7 @@ final class FailedRowExporter
             }
 
             $line[] = $this->guard($row->reason);
-            fputcsv($handle, $line);
+            fputcsv($handle, $line, escape: '');
         }
 
         rewind($handle);
