@@ -50,7 +50,7 @@
     },
     "sort-packages": true
   },
-  "minimum-stability": "stable",
+  "minimum-stability": "dev",
   "prefer-stable": true,
   "scripts": {
     "lint": "vendor/bin/pint",
