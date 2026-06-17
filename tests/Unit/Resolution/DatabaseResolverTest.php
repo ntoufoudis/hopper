@@ -7,6 +7,7 @@ use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Support\Facades\Event;
 use Ntoufoudis\Hopper\Enums\ResolutionType;
 use Ntoufoudis\Hopper\Resolution\DatabaseResolver;
+use Ntoufoudis\Hopper\Tests\Fixtures\Models\ArrayEmailCustomer;
 use Ntoufoudis\Hopper\Tests\Fixtures\Models\Customer;
 
 /** A minimal concrete resolver that overwrites the matched model with incoming. */
@@ -76,6 +77,18 @@ it('inserts everything and never queries when no model is set', function () {
 
     expect($resolver->resolve(['email' => 'a@b.com'])->type)->toBe(ResolutionType::Insert)
         ->and($selects)->toBe(0);
+});
+
+it('skips a found record whose match-field value is non-scalar (falls back to Insert)', function () {
+    // Stored as a plain string, but read back through a model that casts email
+    // to an array, so the primed lookup sees a non-scalar value and skips it.
+    Customer::create(['name' => 'Alice', 'email' => 'alice@example.com']);
+
+    $resolver = inlineResolver();
+    $resolver->useModel(ArrayEmailCustomer::class);
+    $resolver->prime([['email' => 'alice@example.com']]);
+
+    expect($resolver->resolve(['email' => 'alice@example.com'])->type)->toBe(ResolutionType::Insert);
 });
 
 it('treats a blank or missing match field as no match (Insert)', function () {

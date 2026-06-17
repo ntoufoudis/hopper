@@ -188,6 +188,7 @@ Published to `config/hopper.php`: `queue_connection`, `default_chunk_size`,
   $run = Hopper::define(CustomerImport::class)
       ->from(CsvSource::make(Storage::path($path)))      // worker-readable path
       ->stage();                                         // safe to queue
+  ```
 
 ## Versioning
 

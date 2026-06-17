@@ -1,0 +1,78 @@
+name: Bug report
+description: Report a bug in Hopper
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug. Please **do not** use this for security
+        issues - those go through the [Security Policy](../blob/main/SECURITY.md).
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: Pre-flight
+      options:
+        - label: I'm using a supported version (latest 1.x).
+          required: true
+        - label: I searched existing issues and didn't find a duplicate.
+          required: true
+        - label: This is not a security vulnerability (those are reported privately).
+          required: true
+  - type: input
+    id: hopper-version
+    attributes:
+      label: Hopper version
+      placeholder: "e.g. 1.0.1"
+    validations:
+      required: true
+  - type: input
+    id: php-version
+    attributes:
+      label: PHP version
+      placeholder: "e.g. 8.3"
+    validations:
+      required: true
+  - type: input
+    id: laravel-version
+    attributes:
+      label: Laravel version
+      placeholder: "e.g. 12.x"
+    validations:
+      required: true
+  - type: dropdown
+    id: source
+    attributes:
+      label: Source type
+      description: Which source were you importing from?
+      options:
+        - CSV
+        - Excel
+        - Other / not applicable
+    validations:
+      required: false
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: A clear description of the bug and what you expected to happen instead.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: >
+        The smallest possible reproduction - ideally a minimal ImportDefinition plus the calls
+        that trigger the problem, or a failing test. The more self-contained, the faster we can
+        help.
+      render: php
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs or stack trace
+      description: Paste any exception output. This is automatically formatted as code.
+      render: shell
+    validations:
+      required: false
