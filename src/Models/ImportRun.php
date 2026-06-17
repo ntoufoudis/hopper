@@ -6,7 +6,6 @@ namespace Ntoufoudis\Hopper\Models;
 
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Container\CircularDependencyException;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Carbon;
@@ -31,23 +30,34 @@ use Ntoufoudis\Hopper\Staging\PreviewBuilder;
  * @property ?Carbon $started_at
  * @property ?Carbon $completed_at
  */
-#[Fillable([
-    'status',
-    'import_definition',
-    'source_fingerprint',
-    'actor_type',
-    'actor_id',
-    'total',
-    'processed',
-    'inserted',
-    'updated',
-    'skipped',
-    'failed',
-    'started_at',
-    'completed_at',
-])]
 final class ImportRun extends Model
 {
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
+    protected $fillable = [
+        'status',
+        'import_definition',
+        'source_fingerprint',
+        'actor_type',
+        'actor_id',
+        'total',
+        'processed',
+        'inserted',
+        'updated',
+        'skipped',
+        'failed',
+        'started_at',
+        'completed_at',
+    ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return string[]
+     */
     protected function casts(): array
     {
         return [

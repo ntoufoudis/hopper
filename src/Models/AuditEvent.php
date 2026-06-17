@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Ntoufoudis\Hopper\Models;
 
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Config;
@@ -15,14 +14,25 @@ use Illuminate\Support\Facades\Config;
  * @property array<string, mixed> $context
  * @property Carbon $occurred_at
  */
-#[Fillable([
-    'run_id',
-    'event',
-    'context',
-    'occurred_at',
-])]
 final class AuditEvent extends Model
 {
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
+    protected $fillable = [
+        'run_id',
+        'event',
+        'context',
+        'occurred_at',
+    ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return string[]
+     */
     protected function casts(): array
     {
         return [

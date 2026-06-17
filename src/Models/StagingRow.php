@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Ntoufoudis\Hopper\Models;
 
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Config;
@@ -18,17 +17,28 @@ use Ntoufoudis\Hopper\Enums\ResolutionType;
  * @property ?string $resolved_key
  * @property ?Carbon $committed_at
  */
-#[Fillable([
-    'run_id',
-    'source_row_number',
-    'row_hash',
-    'payload',
-    'resolution',
-    'resolved_key',
-    'committed_at',
-])]
 final class StagingRow extends Model
 {
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
+    protected $fillable = [
+        'run_id',
+        'source_row_number',
+        'row_hash',
+        'payload',
+        'resolution',
+        'resolved_key',
+        'committed_at',
+    ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return string[]
+     */
     protected function casts(): array
     {
         return [

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Ntoufoudis\Hopper\Models;
 
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Config;
 
@@ -16,15 +15,26 @@ use Illuminate\Support\Facades\Config;
  * @property array<string, mixed> $payload
  * @property string $reason
  */
-#[Fillable([
-    'run_id',
-    'source_row_number',
-    'row_hash',
-    'payload',
-    'reason',
-])]
 final class FailedRow extends Model
 {
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
+    protected $fillable = [
+        'run_id',
+        'source_row_number',
+        'row_hash',
+        'payload',
+        'reason',
+    ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return string[]
+     */
     protected function casts(): array
     {
         return [
