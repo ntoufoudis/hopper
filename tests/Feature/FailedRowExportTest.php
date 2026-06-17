@@ -67,3 +67,36 @@ it('only exports the given run\'s failed rows', function () {
     expect($csv)->toContain('Mine')
         ->and($csv)->not->toContain('Theirs');
 });
+
+it('passes the escape argument explicitly so output is PHP 8.4+ stable', function () {
+    $run = makeFailedRun();
+
+    FailedRow::create([
+        'run_id' => $run->id,
+        'source_row_number' => 1,
+        'row_hash' => hash('sha256', 'fp:esc:1'),
+        'payload' => ['name' => 'a"b', 'path' => 'C:\\data\\'],
+        'reason' => 'bad',
+    ]);
+
+    $deprecations = [];
+    set_error_handler(static function (int $errno, string $message) use (&$deprecations): bool {
+        $deprecations[] = $message;
+
+        return true;
+    }, E_DEPRECATED);
+
+    try {
+        $csv = app(FailedRowExporter::class)->export($run);
+    } finally {
+        restore_error_handler();
+    }
+
+    $lines = array_values(array_filter(explode("\n", trim($csv))));
+    // Parse the data line back with the same explicit empty escape.
+    $parsed = str_getcsv($lines[1], ',', '"', '');
+
+    expect($deprecations)->toBe([])
+        ->and($parsed[0])->toBe('a"b')
+        ->and($parsed[1])->toBe('C:\\data\\');
+});

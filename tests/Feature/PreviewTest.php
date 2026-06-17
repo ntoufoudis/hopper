@@ -53,5 +53,5 @@ it('counts staged verdicts and failed rows without touching the target', functio
         ->and($preview->skips)->toBe(1)
         ->and($preview->valid)->toBe(4)
         ->and($preview->errors)->toBe(1)
-        ->and($preview->total)->toBe(5);
+        ->and($preview->total)->toBe(4);
 });

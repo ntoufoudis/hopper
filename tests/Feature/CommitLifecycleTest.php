@@ -8,6 +8,8 @@ use Ntoufoudis\Hopper\Sources\CsvSource;
 use Ntoufoudis\Hopper\Staging\Committer;
 use Ntoufoudis\Hopper\Tests\Fixtures\Imports\CustomerImport;
 use Ntoufoudis\Hopper\Tests\Fixtures\Imports\ExplodingImport;
+use Ntoufoudis\Hopper\Tests\Fixtures\Imports\UpsertCustomerImport;
+use Ntoufoudis\Hopper\Tests\Fixtures\Models\Customer;
 
 it('stamps started_at and completed_at on a successful commit', function () {
     $run = Hopper::define(CustomerImport::class)
@@ -34,4 +36,21 @@ it('marks a run partially completed when a later chunk fails after earlier chunk
         ->and($run->inserted)->toBe(2)
         ->and($run->started_at)->not->toBeNull()
         ->and($run->completed_at)->toBeNull();
+});
+
+it('runs updates through the model lifecycle (events + casts fire)', function () {
+    Customer::create(['email' => 'alice@example.com', 'name' => 'old']);
+
+    $fired = 0;
+    Customer::updated(function () use (&$fired) {
+        $fired++;
+    });
+
+    $run = Hopper::define(UpsertCustomerImport::class)
+        ->from(CsvSource::make(__DIR__.'/../Fixtures/csv/customers.csv'))
+        ->stage();
+    $run->commit();
+
+    expect($fired)->toBeGreaterThan(0)
+        ->and(Customer::where('email', 'alice@example.com')->first()->name)->not->toBe('old');
 });

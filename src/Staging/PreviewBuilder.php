@@ -36,7 +36,7 @@ final class PreviewBuilder
         $errors = FailedRow::query()->where('run_id', $run->id)->count();
 
         $preview = new ImportPreview(
-            total: $valid + $errors,
+            total: $valid,
             valid: $valid,
             errors: $errors,
             inserts: $inserts,

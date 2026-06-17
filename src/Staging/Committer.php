@@ -69,18 +69,19 @@ final class Committer
         $definition = new ($run->import_definition);
         $modelClass = $definition->model();
 
-        $rows = StagingRow::query()
-            ->where('run_id', $run->id)
-            ->whereNull('committed_at')
-            ->orderBy('id')
-            ->limit($definition->chunkSize())
-            ->get();
+        return DB::transaction(function () use ($definition, $modelClass, $run): int {
+            $rows = StagingRow::query()
+                ->where('run_id', $run->id)
+                ->whereNull('committed_at')
+                ->orderBy('id')
+                ->limit($definition->chunkSize())
+                ->lockForUpdate()
+                ->get();
 
-        if ($rows->isEmpty()) {
-            return 0;
-        }
+            if ($rows->isEmpty()) {
+                return 0;
+            }
 
-        DB::transaction(function () use ($definition, $rows, $modelClass, $run): void {
             $inserted = 0;
             $updated = 0;
             $skipped = 0;
@@ -96,8 +97,11 @@ final class Committer
                         $inserted++;
                         break;
                     case ResolutionType::Update:
-                        $modelClass::query()->whereKey($row->resolved_key)->update($attributes);
-                        $updated++;
+                        $model = $modelClass::query()->whereKey($row->resolved_key)->first();
+                        if ($model !== null) {
+                            $model->fill($attributes)->save();
+                            $updated++;
+                        }
                         break;
                     case ResolutionType::Skip:
                         $skipped++;
@@ -111,8 +115,8 @@ final class Committer
             $run->increment('updated', $updated);
             $run->increment('skipped', $skipped);
             $run->increment('processed', $rows->count());
-        });
 
-        return $rows->count();
+            return $rows->count();
+        });
     }
 }

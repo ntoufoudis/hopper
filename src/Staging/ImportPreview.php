@@ -7,7 +7,8 @@ namespace Ntoufoudis\Hopper\Staging;
 /**
  * Pre-commit counts for one run, read entirely from persisted staging verdicts.
  * valid = inserts + updates + skips (rows that staged); errors = diverted/failed
- * rows; total = valid + errors.
+ * rows; total = valid (the rows that will be committed). Failed rows are reported
+ * separately in errors, never folded into total.
  */
 final readonly class ImportPreview
 {

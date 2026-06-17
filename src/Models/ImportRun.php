@@ -6,7 +6,6 @@ namespace Ntoufoudis\Hopper\Models;
 
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Container\CircularDependencyException;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Carbon;
@@ -31,23 +30,34 @@ use Ntoufoudis\Hopper\Staging\PreviewBuilder;
  * @property ?Carbon $started_at
  * @property ?Carbon $completed_at
  */
-#[Fillable([
-    'status',
-    'import_definition',
-    'source_fingerprint',
-    'actor_type',
-    'actor_id',
-    'total',
-    'processed',
-    'inserted',
-    'updated',
-    'skipped',
-    'failed',
-    'started_at',
-    'completed_at',
-])]
 final class ImportRun extends Model
 {
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
+    protected $fillable = [
+        'status',
+        'import_definition',
+        'source_fingerprint',
+        'actor_type',
+        'actor_id',
+        'total',
+        'processed',
+        'inserted',
+        'updated',
+        'skipped',
+        'failed',
+        'started_at',
+        'completed_at',
+    ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return string[]
+     */
     protected function casts(): array
     {
         return [
@@ -86,7 +96,19 @@ final class ImportRun extends Model
 
     public function commit(): self
     {
-        $this->update(['status' => RunStatus::Importing]);
+        // Atomically claim the run for committing. Only a run in a commitable state
+        // (Ready, or resumable PartiallyCompleted) may transition to Importing; a
+        // duplicate or concurrent commit() sees 0 rows affected and refuses re-entry.
+        $claimed = ImportRun::query()
+            ->whereKey($this->getKey())
+            ->whereIn('status', [RunStatus::Ready, RunStatus::PartiallyCompleted])
+            ->update(['status' => RunStatus::Importing]);
+
+        if ($claimed === 0) {
+            return $this;
+        }
+
+        $this->setAttribute('status', RunStatus::Importing);
 
         // Dispatch through the bus (not CommitChunk::dispatch) so the job never
         // runs inside PendingDispatch::__destruct(): on the sync connection a

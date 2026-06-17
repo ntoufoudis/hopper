@@ -10,7 +10,7 @@ breaking changes between any two versions - see upgrade notes per version.
 
 ## [Unreleased]
 
-## [1.0.0] - TBD
+## [1.0.0] - 2026-06-17
 
 Hopper 1.0: a headless import engine for Laravel - mapping persistence, exact pre-commit preview, idempotent re-runnable staging/commit for CSV and XLSX sources, pluggable resolvers, validation + transformation pipes, failed-row export, and a governed audit seam.
 
@@ -68,6 +68,11 @@ Hopper 1.0: a headless import engine for Laravel - mapping persistence, exact pr
 
 - `CsvSource` and `ExcelSource` memoize their content fingerprint, hashing the file at most once per instance. Previously `fingerprint()` re-ran `hash_file()` on every call - three times per `stage()` before the first row was processed - re-reading the whole upload each time.
 - Constrained `maatwebsite/excel` from `*` to `^3.1||^4`.
+- Commit now routes updates through the model lifecycle: a resolved Update fetches the record and `fill()->save()`s it, so updates fire model events/observers and apply casts/mutators consistently with inserts (previously `query()->update()` bypassed them). Costs one read per updated row.
+- Recorded dependency-range decisions: Laravel «^12||^13», PHP «^8.2», and `minimum-stability: «stable»`. The CI matrix now matches the declared range.
+- Updated `README.md`
+- Reconciled the meaning of `total` to **staged-only** across the API: `ImportPreview.total` now equals `valid` (the rows that will be committed) instead of `valid + errors`, matching `ImportRun.total` and `progress()`. Failed rows are reported separately in `errors`/`failed`. `preview()` and `progress()` now agree.
+- Documented the queued-source durability requirement: when staging is queued, the source must be on durable, worker-accessible storage (a temp-upload path will not exist on a separate worker). The README shows the `store()` + `Storage::path()` pattern.
 
 ### Fixed
 
@@ -81,6 +86,8 @@ Hopper 1.0: a headless import engine for Laravel - mapping persistence, exact pr
 - `hopper_staging`, `hopper_failed_rows`, and `hopper_audit` now declare a real foreign key on `run_id` referencing `hopper_runs` - staging/failed rows cascade-delete with their run, and audit rows null their `run_id` on delete. Previously `run_id` was an unconstrained column, leaving child rows orphaned when a run was removed.
 - `DatabaseResolver` matching is now safe under case-insensitive database collations. Lookups still try the exact stored value first, then fall back to a case-folded index built only from unambiguous values. Previously, a case-insensitive `whereIn` could load a differently-cased record that the byte-exact in-memory lookup then missed, producing a duplicate insert instead of an update; case-sensitive data is unaffected because ambiguous folded keys are excluded from the fallback.
 - Polish: `ImportDefinition::chunkSize()` now reads the previously-unused `hopper.default_chunk_size` config value; `PendingImport::stage()`/`autoMap()` throw a clear `LogicException` when called before `from()` instead of an opaque uninitialised-property error; `Committer` uses `Date::now()` consistently for `committed_at`; and the misplaced `stage()` docblock and a `FuzzyMatch` comment typo are corrected.
+- Commit is now safe under duplicate/concurrent dispatch: `ImportRun::commit()` atomically claims a commitable run (refusing re-entry when it is already importing or completed), and `Committer::commitChunk()` selects uncommitted staging rows with `lockForUpdate()` inside the write transaction. A double dispatch or retry-while-running can no longer double-insert.
+- `FailedRowExporter` now passes the `$escape` argument explicitly to `fputcsv()` (`escape: ''`), silencing the PHP 8.4 deprecation and keeping CSV output stable across PHP 8.3/8.4/8.5.
 
 ### Removed
 
