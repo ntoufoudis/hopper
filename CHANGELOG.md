@@ -70,6 +70,7 @@ Hopper 1.0: a headless import engine for Laravel - mapping persistence, exact pr
 - Constrained `maatwebsite/excel` from `*` to `^3.1||^4`.
 - Commit now routes updates through the model lifecycle: a resolved Update fetches the record and `fill()->save()`s it, so updates fire model events/observers and apply casts/mutators consistently with inserts (previously `query()->update()` bypassed them). Costs one read per updated row.
 - Recorded dependency-range decisions: Laravel «^12||^13», PHP «^8.2», and `minimum-stability: «stable»`. The CI matrix now matches the declared range.
+- Updated `README.md`
 
 ### Fixed
 

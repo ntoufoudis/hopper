@@ -1,5 +1,21 @@
 # Hopper
 
+<!--
+keywords:
+laravel
+import
+csv
+excel
+etl
+staging
+-->
+
+⭐ If you find Hopper useful, please consider starring the repository.
+
+![Packagist Version](https://img.shields.io/packagist/v/ntoufoudis/hopper)
+[![Tests](https://github.com/ntoufoudis/hopper/actions/workflows/ci.yml/badge.svg)](https://github.com/ntoufoudis/hopper/actions)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
 A headless, framework-agnostic import engine for Laravel. Hopper owns mapping
 persistence, preview/diff, idempotent re-runnable imports, and governed audit.
 Parsing is delegated to [Laravel Excel](https://laravel-excel.com)
@@ -7,8 +23,8 @@ Parsing is delegated to [Laravel Excel](https://laravel-excel.com)
 
 ## Requirements
 
-- PHP `^8.3`
-- Laravel `^13`
+- PHP `^8.2`
+- Laravel `^12`
 
 ## Installation
 
@@ -154,8 +170,9 @@ Published to `config/hopper.php`: `queue_connection`, `default_chunk_size`,
 
 ## Limitations
 
-<!-- TODO(5b): commit re-entry / concurrency guarantees - finalised in Session 5b -->
-<!-- TODO(5b): insert/update lifecycle asymmetry - finalised in Session 5b -->
+- **Concurrency.** Commit is safe under duplicate/concurrent dispatch — re-entry is
+  refused and uncommitted rows are locked — so a double dispatch cannot double-write.
+
 <!-- TODO(5c): queued-source durability requirement - finalised in Session 5c -->
 
 ## Versioning
