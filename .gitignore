@@ -1,6 +1,7 @@
 # Composer Related
 /vendor
 composer.lock
+coverage.xml
 
 # Caches
 .phpunit.cache
