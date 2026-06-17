@@ -170,10 +170,24 @@ Published to `config/hopper.php`: `queue_connection`, `default_chunk_size`,
 
 ## Limitations
 
-- **Concurrency.** Commit is safe under duplicate/concurrent dispatch — re-entry is
-  refused and uncommitted rows are locked — so a double dispatch cannot double-write.
+- **Concurrency.** Commit is safe under duplicate/concurrent dispatch - re-entry is
+  refused and uncommitted rows are locked - so a double dispatch cannot double-write.
 
-<!-- TODO(5c): queued-source durability requirement - finalised in Session 5c -->
+- **Queued-source durability.** When staging runs on a queue, the source file must
+  live on storage the worker can read. A framework temp-upload path
+  (`$request->file('import')->getRealPath()`) belongs to the web request and will
+  not exist on a separate worker. Persist the upload to a durable disk first, then
+  point the source at the stored path:
+
+  ```php
+  use Illuminate\Support\Facades\Storage;
+  use Ntoufoudis\Hopper\Hopper;
+  use Ntoufoudis\Hopper\Sources\CsvSource;
+
+  $path = $request->file('import')->store('imports');   // durable disk
+  $run = Hopper::define(CustomerImport::class)
+      ->from(CsvSource::make(Storage::path($path)))      // worker-readable path
+      ->stage();                                         // safe to queue
 
 ## Versioning
 

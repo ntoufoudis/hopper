@@ -72,6 +72,7 @@ Hopper 1.0: a headless import engine for Laravel - mapping persistence, exact pr
 - Recorded dependency-range decisions: Laravel «^12||^13», PHP «^8.2», and `minimum-stability: «stable»`. The CI matrix now matches the declared range.
 - Updated `README.md`
 - Reconciled the meaning of `total` to **staged-only** across the API: `ImportPreview.total` now equals `valid` (the rows that will be committed) instead of `valid + errors`, matching `ImportRun.total` and `progress()`. Failed rows are reported separately in `errors`/`failed`. `preview()` and `progress()` now agree.
+- Documented the queued-source durability requirement: when staging is queued, the source must be on durable, worker-accessible storage (a temp-upload path will not exist on a separate worker). The README shows the `store()` + `Storage::path()` pattern.
 
 ### Fixed
 
